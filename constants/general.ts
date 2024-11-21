@@ -11,7 +11,31 @@ export const ROUTES = {
   PROFILE: "/profile",
   PRODUCTS: "/products",
   EXPLORE: "/explore",
+  ADMIN: "/admin",
+  MANAGE_PRODUCT: "/admin/manage-product",
+  MANAGE_ORDER: "/admin/manage-order",
+  MANAGE_VIEW: "/admin/manage-view",
+  MANAGE_COUPONS: "/admin/manage-coupons",
 };
+
+export const ADMIN_ROUTES = [
+  {
+    label: "상품 관리",
+    url: ROUTES.MANAGE_PRODUCT,
+  },
+  {
+    label: "주문 관리",
+    url: ROUTES.MANAGE_ORDER,
+  },
+  {
+    label: "둘러보기 관리",
+    url: ROUTES.MANAGE_VIEW,
+  },
+  {
+    label: "쿠폰 관리",
+    url: ROUTES.MANAGE_COUPONS,
+  },
+];
 
 export const AUTH_ACCOUNT_ROUTES = [
   { label: "마이 페이지", url: ROUTES.ACCOUNT },

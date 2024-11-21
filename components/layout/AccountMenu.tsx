@@ -71,12 +71,22 @@ const AccountMenu = () => {
 
               return (
                 <DropdownMenuItem key={link.label}>
-                  <Link href={link.url} className="cursor-pointer text-lg">
+                  <Link href={link.url} className="cursor-pointer text-base">
                     {link.label}
                   </Link>
                 </DropdownMenuItem>
               );
             })}
+        {session &&
+          session.data &&
+          session.data.user &&
+          session.data.user.isAdmin && (
+            <DropdownMenuItem>
+              <Link href={ROUTES.ADMIN} className="cursor-pointer text-base">
+                관리자
+              </Link>
+            </DropdownMenuItem>
+          )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
