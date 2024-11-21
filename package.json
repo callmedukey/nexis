@@ -11,6 +11,8 @@
   "browserslist": "> 0.5%, last 10 versions, not ie <= 11, not ie_mob <= 11",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@radix-ui/react-dialog": "^1.1.2",
+    "@radix-ui/react-dropdown-menu": "^2.1.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "eslint-config-prettier": "^9.1.0",
@@ -22,7 +24,8 @@
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
     "tailwind-merge": "^2.5.4",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "vaul": "^1.1.1"
   },
   "devDependencies": {
     "@types/node": "^20.17.6",

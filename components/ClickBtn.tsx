@@ -9,8 +9,8 @@ const KakaoButton = () => {
       onSubmit={async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        await signIn("kakao", {
-          callbackUrl: ROUTES.HOME,
+        await signIn("naver", {
+          callbackUrl: ROUTES.AFTER_LOGIN,
           redirect: false,
         });
       }}

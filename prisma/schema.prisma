@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi"]
 }
 
 datasource db {
@@ -20,9 +21,10 @@ enum ProductStatus {
 }
 
 model User {
-  id         String @id @default(uuid())
+  id String @id @default(uuid())
+
   provider   String
-  providerId String
+  providerId String @unique
 
   isAdmin Boolean @default(false)
 
@@ -36,7 +38,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([provider, providerId])
+  @@index([providerId])
 }
 
 model Order {
