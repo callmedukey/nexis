@@ -16,6 +16,7 @@ export const ROUTES = {
   MANAGE_ORDER: "/admin/manage-order",
   MANAGE_VIEW: "/admin/manage-view",
   MANAGE_COUPONS: "/admin/manage-coupons",
+  MANAGE_PRODUCT_ADD: "/admin/manage-product/add",
 };
 
 export const ADMIN_ROUTES = [
@@ -56,3 +57,5 @@ export const HEADER_ROUTES = [
 ];
 
 export const ICONGRAY = "#484848";
+export const LIGHTGRAY = "#EDEDED";
+export const PRIMARYBLUE = "#326cff";

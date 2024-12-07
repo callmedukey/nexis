@@ -59,13 +59,6 @@ model Order {
   @@index([userId, orderId])
 }
 
-model Category {
-  id   Int    @id @default(autoincrement())
-  name String
-
-  products Product[]
-}
-
 model Product {
   id          Int           @id @default(autoincrement())
   status      ProductStatus @default(ACTIVE)
@@ -78,14 +71,13 @@ model Product {
 
   orders Order[]
 
-  category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId Int?
+  category String[]
+  stock    Int     @default(0)
 
   productMainImages ProductMainImage[]
   productImages     ProductImage[]
   options           String[]
 
-  pickup   Boolean @default(false)
   delivery Boolean @default(false)
 
   @@index([id])
@@ -96,11 +88,13 @@ model ProductMainImage {
   url      String
   filename String
   filetype String
+  order    Int    @default(0)
 
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
 
   @@index([productId])
+  @@index([order])
 }
 
 model ProductImage {
@@ -108,9 +102,11 @@ model ProductImage {
   url      String
   filename String
   filetype String
+  order    Int    @default(0)
 
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
 
   @@index([productId])
+  @@index([order])
 }

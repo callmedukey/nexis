@@ -28,7 +28,7 @@ const AccountMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <UserRound color={ICONGRAY} className="size-6" />
+        <UserRound color={ICONGRAY} className="size-6 cursor-pointer" />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="text-lg">
         <DropdownMenuLabel className="text-center text-base font-medium">

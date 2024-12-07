@@ -5,9 +5,9 @@ import { ROUTES } from "@/constants/general";
 
 const AdminPage = async () => {
   const session = await auth();
-
+  console.log(session);
   if (!session || !session.user.isAdmin) {
-    return redirect(ROUTES.LOGIN);
+    return redirect(ROUTES.HOME);
   }
 
   return redirect(ROUTES.MANAGE_PRODUCT);

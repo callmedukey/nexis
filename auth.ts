@@ -2,7 +2,7 @@ import NextAuth, { DefaultSession } from "next-auth";
 import kakao from "next-auth/providers/kakao";
 import naver from "next-auth/providers/naver";
 
-import prisma from "@/lib/db/prisma";
+import prisma from "@/lib/prisma";
 
 declare module "next-auth" {
   /**
