@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
 
-import { getProducts } from "@/actions/admin";
 import { auth } from "@/auth";
 import {
   Accordion,
@@ -12,6 +11,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { PRODUCT_CATEGORIES } from "@/lib/constants/zod";
+import prisma from "@/lib/prisma";
 
 import { ProductList } from "./_components/ProductList";
 
@@ -36,13 +36,32 @@ export default async function Page({
     redirect("/");
   }
 
-  const result = await searchParamsSchema.safeParseAsync(searchParams);
+  const result = await searchParamsSchema.safeParseAsync(await searchParams);
   const category = result.success ? result.data.category : undefined;
-
-  const productsResult = await getProducts(category);
-  if (!productsResult.success) {
-    throw new Error(productsResult.message);
-  }
+  const products = await prisma.product.findMany({
+    where: category
+      ? {
+          category: {
+            has: category,
+          },
+        }
+      : undefined,
+    include: {
+      productMainImages: {
+        orderBy: {
+          order: "asc",
+        },
+      },
+      productImages: {
+        orderBy: {
+          order: "asc",
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   return (
     <main className="flex items-start gap-8 bg-lightgray px-4 py-8">
@@ -104,7 +123,26 @@ export default async function Page({
           </div>
 
           <Suspense fallback={<div>Loading products...</div>}>
-            <ProductList products={productsResult.data ?? []} />
+            <ProductList
+              products={products.map((product) => ({
+                id: product.id,
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                options: product.options,
+                status: product.status,
+                category: product.category,
+                stock: product.stock,
+                delivery: product.delivery,
+                discount: product.discount,
+                createdAt: product.createdAt,
+                updatedAt: product.updatedAt,
+                productMainImages: product.productMainImages.map(
+                  (img) => img.url
+                ),
+                productImages: product.productImages.map((img) => img.url),
+              }))}
+            />
           </Suspense>
         </div>
       </div>

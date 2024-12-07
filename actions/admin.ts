@@ -348,71 +348,6 @@ export async function deleteProduct(
   }
 }
 
-export async function getProducts(category?: string) {
-  try {
-    const session = await auth();
-    if (!session?.user.isAdmin) {
-      return {
-        success: false,
-        message: "관리자만 접근할 수 있습니다.",
-      };
-    }
-
-    const products = await prisma.product.findMany({
-      where: category
-        ? {
-            category: {
-              has: category,
-            },
-          }
-        : undefined,
-      include: {
-        productMainImages: true,
-        productImages: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return {
-      success: true,
-      data: products.map(
-        (
-          product: Prisma.ProductGetPayload<{
-            include: { productMainImages: true; productImages: true };
-          }>
-        ) => ({
-          id: product.id,
-          name: product.name,
-          description: product.description,
-          price: product.price,
-          discount: product.discount,
-          category: product.category,
-          stock: product.stock,
-          options: product.options,
-          delivery: product.delivery,
-          status: product.status,
-          createdAt: product.createdAt,
-          updatedAt: product.updatedAt,
-          productMainImages: product.productMainImages.map(
-            (img: { url: string }) => img.url
-          ),
-          productImages: product.productImages.map(
-            (img: { url: string }) => img.url
-          ),
-        })
-      ),
-    };
-  } catch (error) {
-    console.error("Failed to get products:", error);
-    return {
-      success: false,
-      message: "상품 목록을 가져오는데 실패했습니다.",
-    };
-  }
-}
-
 export async function updateProductStatus(
   productId: number,
   status: ProductStatus
@@ -771,11 +706,13 @@ export async function reorderProductImages(
   }
 }
 
-const uploadImagesSchema = z.object({
-  type: z.enum(["main", "detail"]),
-  productId: z.number(),
-  images: z.array(z.instanceof(File)),
-}).strict();
+const uploadImagesSchema = z
+  .object({
+    type: z.enum(["main", "detail"]),
+    productId: z.number(),
+    images: z.array(z.instanceof(File)),
+  })
+  .strict();
 
 export async function uploadProductImages(
   data: unknown
@@ -802,17 +739,18 @@ export async function uploadProductImages(
     const { type, productId, images } = result.data;
 
     // Get current max order
-    const currentMaxOrder = type === "main"
-      ? await prisma.productMainImage.findFirst({
-          where: { productId },
-          orderBy: { order: 'desc' },
-          select: { order: true }
-        })
-      : await prisma.productImage.findFirst({
-          where: { productId },
-          orderBy: { order: 'desc' },
-          select: { order: true }
-        });
+    const currentMaxOrder =
+      type === "main"
+        ? await prisma.productMainImage.findFirst({
+            where: { productId },
+            orderBy: { order: "desc" },
+            select: { order: true },
+          })
+        : await prisma.productImage.findFirst({
+            where: { productId },
+            orderBy: { order: "desc" },
+            select: { order: true },
+          });
 
     const startOrder = (currentMaxOrder?.order ?? -1) + 1;
 
