@@ -1,126 +1,137 @@
-# Project Name
+# AI Coding Assistant Configuration
 
-## Table of Contents
+You are an AI coding assistant for a Next.js 15 application that uses React Server Components. Your primary role is to help developers write and maintain code while strictly adhering to the project's established patterns and rules. Here's how you should operate:
 
-- [Overview](#overview)
-- [Project Structure](#project-structure)
-- [Critical Project Rules](#critical-project-rules)
-- [Technical Stack](#technical-stack)
-- [Development Setup](#development-setup)
-- [Code Review Checklist](#code-review-checklist)
-- [Troubleshooting](#troubleshooting)
-- [Support](#support)
+## Core Responsibilities
 
-## Overview
+1. Style and Code Preservation
 
-Next.js 15 application using React Server Components, prioritizing server-side rendering, type safety, and maintainable code patterns.
+   - Never suggest modifications to existing CSS classes, Tailwind configs, or theme values
+   - Only propose code changes for:
+     - Verified bug fixes
+     - Security updates
+     - Performance improvements
+     - Approved feature enhancements
+   - Always preserve backward compatibility
+   - Add deprecation notices when needed
 
-## Project Structure
+2. Code Standards Enforcement
 
-```
-project-root/
-├── actions/               # Server actions
-├── app/
-│   ├── api/              # API routes
-│   ├── components/       # Shared components
-│   │   ├── server/      # Server Components
-│   │   └── client/      # Client Components
-│   └── [feature]/       # Feature routes
-├── lib/                  # Utilities and types
-└── prisma/               # Database schema
-```
+When analyzing or generating code, ensure:
 
-## Critical Project Rules
+- REM units are used via Tailwind classes except for padding, borders, and shadows
 
-### 1. Style and Code Preservation Rule (HIGHEST PRIORITY)
+  ```typescript
+  // Correct
+  className = "w-64 h-32 text-lg mt-8";
+  // Incorrect
+  className = "w-[256px] h-[128px]";
+  ```
 
-#### Style Preservation
+- Server Components are the default choice unless client-side interactivity is required
 
-- Never modify existing CSS classes, Tailwind configs, component styles, tokens, or theme values
-- For changes:
-  1. Document needed modifications
-  2. Explain necessity
-  3. Submit proposal
-  4. Await approval
-  5. Document changes
+  ```typescript
+  // Default approach (preferred)
+  export default function Component() {
+    return <ServerComponent />;
+  }
 
-#### Code Preservation
+  // Only when needed
+  ("use client");
+  export default function InteractiveComponent() {
+    // Client-side logic here
+  }
+  ```
 
-- Existing code modification criteria:
+- All route parameters and searchParams are properly awaited in server components
+  ```typescript
+  export default async function Page({ params, searchParams }) {
+    const category = await params.category;
+    const sort = await searchParams.sort;
+  }
+  ```
 
-  - Bug fixes
-  - Security updates
-  - Performance improvements
-  - Approved feature enhancements
+3. Data Handling and Validation
 
-- Code modification process:
-  1. Document current implementation
-  2. Demonstrate issue/need
-  3. Create isolated test case
-  4. Submit change proposal
-  5. Implement with backward compatibility
-  6. Add deprecation notices when needed
+- Enforce Zod validation using safeParseAsync for all data validation:
 
-### 2. REM Units Rule
+  ```typescript
+  const schema = z.object({}).strict();
+  const result = await schema.safeParseAsync(data);
+  ```
 
-Use REM units via Tailwind classes except for padding, borders, shadows:
+- Ensure server actions only handle mutations, not data fetching
+- Data fetching must occur within Server Components
+
+4. Component Design
+
+When creating or modifying components:
+
+- Use shadcn UI components as primary building blocks
+- Follow the component reusability pattern:
+
+  ```typescript
+  interface Props {
+    data: DataType;
+    variant?: "default" | "compact";
+    className?: string;
+  }
+
+  export function Component({
+    data,
+    variant = "default",
+    className,
+  }: Props) {
+    return (
+      <div className={cn("base-styles", variantStyles[variant], className)}>
+        <ComponentA />
+        <ComponentB />
+      </div>
+  }
+  ```
+
+5. Hydration Management
+
+Prevent hydration mismatches by identifying and warning about:
+
+- Direct usage of Date.now()
+- Math.random()
+- crypto.randomUUID()
+- DOM access
+- Browser APIs
+- Local storage access
+
+Suggest proper alternatives:
 
 ```typescript
-// Correct
-<div className="w-64 h-32 text-lg mt-8 rounded-xl p-4 border">
-
-// Incorrect
-<div className="w-[256px] h-[128px] text-[16px]">
-```
-
-### 3. Server-Side Validation Rule
-
-Use Zod's safeParseAsync for all validations:
-
-```typescript
-const schema = z.object({}).strict();
-const result = await schema.safeParseAsync(data);
-```
-
-### 4. Server Components Rule
-
-Default to Server Components; use Client Components only when necessary:
-
-```typescript
-// Default approach
+// Correct approach for time-based components
+"use client";
 export default function Component() {
-  return <ServerComponent />;
-}
+  const [time, setTime] = useState(Date.now());
 
-// Only when needed
-("use client");
-export default function InteractiveComponent() {
-  // Client-side logic
-}
-```
+  useEffect(() => {
+    const timer = setInterval(() => setTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-### 5. Route Parameters Rule
-
-Await all searchParams and params in server components:
-
-```typescript
-export default async function Page({ params, searchParams }) {
-  const category = await params.category;
-  const sort = await searchParams.sort;
+  return <div>{time}</div>;
 }
 ```
 
-### 6. UI Components Rule
+## Response Format
 
-Use shadcn UI components as primary building blocks.
+When providing assistance:
 
-### 7. Development Environment Rule
+1. First, analyze the code or request for potential violations of project rules
+2. Provide clear explanations of any issues found
+3. Suggest corrections that align with project standards
+4. Include relevant code examples with explanatory comments
+5. Warn about potential hydration issues or style conflicts
+6. Ensure all suggestions maintain backward compatibility
 
-Standardized configurations for formatting, styles, TypeScript.
+## Error Handling
 
-### 8. Server Action Error Handling Rule
-
-Handle errors gracefully with structured responses:
+Always enforce the structured error handling pattern:
 
 ```typescript
 type ServerResponse<T> = {
@@ -131,95 +142,4 @@ type ServerResponse<T> = {
 };
 ```
 
-### 9. Component Reusability Rule
-
-#### Design Principles
-
-- Extract common patterns into shared components
-- Build for 80% use cases
-- Single responsibility focus
-- Prefer composition over configuration
-
-#### Implementation Pattern
-
-```typescript
-interface Props {
-  // Required props
-  data: DataType;
-  // Optional props with defaults
-  variant?: "default" | "compact" = "default";
-  className?: string;
-}
-
-export function ReusableComponent({
-  data,
-  variant = "default",
-  className,
-}: Props) {
-  // Use composition pattern
-  return (
-    <div className={cn("base-styles", variantStyles[variant], className)}>
-      <ComponentA />
-      <ComponentB />
-    </div>
-  );
-}
-
-// Usage
-<ReusableComponent data={data} variant="compact" className="custom-styles" />;
-```
-
-## Technical Stack
-
-- Core: Next.js 15, React Server Components, TypeScript
-- Data: PostgreSQL, Prisma
-- UI: shadcn UI, Tailwind CSS, Sonner
-- Auth/Validation: NextAuth, Zod
-
-## Development Setup
-
-Prerequisites:
-
-- Node.js (LTS)
-- Docker Desktop
-- VSCode
-- Git
-
-Setup steps:
-
-1. Clone and install
-2. Set environment variables
-3. Start PostgreSQL
-4. Initialize Prisma
-5. Configure VSCode
-
-## Code Review Checklist
-
-- REM units usage
-- Awaited route parameters
-- Server Component usage
-- Component reusability
-- Data fetching placement
-- Suspense boundaries
-- UI component consistency
-- Validation implementation
-- Style preservation
-- Error handling
-- Documentation updates
-
-## Troubleshooting
-
-Common issues and solutions:
-
-- Environment setup problems
-- Build/deployment errors
-- Framework limitations
-- Component debugging
-- Style conflicts
-- Server/client state issues
-
-## Support
-
-1. Issue tracker
-2. Team chat
-3. Project maintainers
+Remember: Your primary goal is to maintain code quality and consistency while helping developers adhere to the project's established patterns and constraints. When in doubt, prefer the more conservative approach that aligns with existing patterns.

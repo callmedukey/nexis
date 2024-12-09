@@ -1,166 +1,123 @@
 "use client";
 
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, X } from "lucide-react";
-import { useState, useContext } from "react";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { GripVertical, Plus, X } from "lucide-react";
+import { useContext, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { Context } from "../_providers/ContextProvider";
 
-interface SortableItemProps {
-  id: string;
-  option: string;
-  onDelete: () => void;
-}
-
-const SortableItem = ({ id, option, onDelete }: SortableItemProps) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({
-      id,
-    });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2"
-    >
-      <div className="flex items-center gap-2">
-        <button
-          className="cursor-grab text-gray-400 hover:text-gray-600"
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical className="size-4" />
-        </button>
-        <span>{option}</span>
-      </div>
-      <button onClick={onDelete} className="text-gray-500 hover:text-gray-700">
-        <X className="size-4" />
-      </button>
-    </div>
-  );
-};
-
-const ProductOptions = () => {
+export default function ProductOptions() {
   const [context, setContext] = useContext(Context);
-  const [optionInput, setOptionInput] = useState("");
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const [newOption, setNewOption] = useState("");
 
   const handleAddOption = () => {
-    if (!optionInput.trim()) return;
-
-    setContext({
-      ...context,
-      options: context.options
-        ? [...context.options, optionInput.trim()]
-        : [optionInput.trim()],
-    });
-    setOptionInput("");
+    if (!newOption.trim()) return;
+    setContext((prev) => ({
+      ...prev,
+      options: [...prev.options, newOption.trim()],
+    }));
+    setNewOption("");
   };
 
-  const handleDeleteOption = (indexToDelete: number) => {
-    setContext({
-      ...context,
-      options: (context.options ?? []).filter(
-        (_, index) => index !== indexToDelete
-      ),
-    });
+  const handleRemoveOption = (index: number) => {
+    setContext((prev) => ({
+      ...prev,
+      options: prev.options.filter((_, i) => i !== index),
+    }));
   };
 
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) return;
 
-    if (active.id !== over.id) {
-      const oldIndex = context.options.findIndex(
-        (item) => `${item}` === active.id
-      );
-      const newIndex = context.options.findIndex(
-        (item) => `${item}` === over.id
-      );
+    const items = Array.from(context.options);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
 
-      const newOptions = [...context.options];
-      const [removed] = newOptions.splice(oldIndex, 1);
-      newOptions.splice(newIndex, 0, removed);
-
-      setContext({
-        ...context,
-        options: newOptions,
-      });
-    }
+    setContext((prev) => ({
+      ...prev,
+      options: items,
+    }));
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <Input
-          value={optionInput}
-          onChange={(e) => setOptionInput(e.target.value)}
-          placeholder="옵션을 입력해주세요"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleAddOption();
-            }
-          }}
-        />
-        <Button onClick={handleAddOption} className="whitespace-nowrap">
-          추가
+      <div className="flex items-end gap-2">
+        <div className="flex-1">
+          <Label htmlFor="option" className="text-sm font-medium">
+            옵션
+          </Label>
+          <Input
+            id="option"
+            value={newOption}
+            onChange={(e) => setNewOption(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleAddOption();
+              }
+            }}
+            placeholder="옵션을 입력하세요"
+          />
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={handleAddOption}
+        >
+          <Plus className="size-4" />
         </Button>
       </div>
 
-      {context.options && context.options.length > 0 && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={context.options.map((item) => `${item}`)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="space-y-2">
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="options">
+          {(provided) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="space-y-2"
+            >
               {context.options.map((option, index) => (
-                <SortableItem
-                  key={option}
-                  id={`${option}`}
-                  option={option}
-                  onDelete={() => handleDeleteOption(index)}
-                />
+                <Draggable
+                  key={option + index}
+                  draggableId={option + index}
+                  index={index}
+                >
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className="flex items-center gap-2 rounded-lg border bg-background p-2"
+                    >
+                      <div
+                        {...provided.dragHandleProps}
+                        className="cursor-grab p-1 hover:text-foreground/80"
+                      >
+                        <GripVertical className="size-4" />
+                      </div>
+                      <span className="flex-1">{option}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-6"
+                        onClick={() => handleRemoveOption(index)}
+                      >
+                        <X className="size-4" />
+                      </Button>
+                    </div>
+                  )}
+                </Draggable>
               ))}
+              {provided.placeholder}
             </div>
-          </SortableContext>
-        </DndContext>
-      )}
+          )}
+        </Droppable>
+      </DragDropContext>
     </div>
   );
-};
-
-export default ProductOptions;
+}

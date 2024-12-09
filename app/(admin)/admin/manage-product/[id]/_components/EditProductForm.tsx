@@ -1,34 +1,73 @@
 "use client";
 
+import type { Category } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import { toast } from "sonner";
 
 import { updateProduct } from "@/actions/admin";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ROUTES } from "@/constants/general";
 
+import EditDetailImagesUploader from "./EditDetailImagesUploader";
+import EditImagesUploader from "./EditImagesUploader";
 import CategorySelector from "../../add/_components/CategorySelector";
 import DeliveryMethod from "../../add/_components/DeliveryMethod";
-import DetailImagesUploader from "../../add/_components/DetailImagesUploader";
-import ImagesUploader from "../../add/_components/ImagesUploader";
 import Price from "../../add/_components/Price";
 import ProductOptions from "../../add/_components/ProductOptions";
 import ProductTitle from "../../add/_components/ProductTitle";
 import { Context } from "../../add/_providers/ContextProvider";
 
-export default function EditProductForm() {
+interface Props {
+  initialCategories: (Category & {
+    subCategory: {
+      id: number;
+      name: string;
+      categoryId: number;
+    }[];
+  })[];
+}
+
+export default function EditProductForm({ initialCategories }: Props) {
   const router = useRouter();
   const [context, setContext] = useContext(Context);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
     try {
+      // Check if there are either new images or existing images
+      const hasMainImages =
+        context.productMainImages.length > 0 ||
+        (context.existingMainImages && context.existingMainImages.length > 0);
+      const hasDetailImages =
+        context.productImages.length > 0 ||
+        (context.existingDetailImages &&
+          context.existingDetailImages.length > 0);
+
+      if (!hasMainImages) {
+        toast.error("메인 이미지를 한 개 이상 업로드해주세요");
+        return;
+      }
+
+      if (!hasDetailImages) {
+        toast.error("상세 이미지를 한 개 이상 업로드해주세요");
+        return;
+      }
+
       setIsLoading(true);
+
+      // Transform categories to match schema
+      const category = context.categories.map((cat) =>
+        cat.categoryId.toString()
+      );
+      const subCategory = context.categories
+        .flatMap((cat) => cat.subCategoryIds.map((id) => id.toString()))
+        .filter(Boolean);
+
       const result = await updateProduct({
-        id: context.id,
+        id: context.id!,
         productMainImages: context.productMainImages,
         productImages: context.productImages,
         name: context.name,
@@ -37,39 +76,44 @@ export default function EditProductForm() {
         options: context.options,
         delivery: context.delivery,
         discountRate: context.discountRate,
-        category: context.category,
+        category,
+        subCategory,
         stock: context.stock ?? 0,
         existingMainImages: context.existingMainImages ?? [],
         existingDetailImages: context.existingDetailImages ?? [],
+        status: context.status,
+        isNew: context.isNew,
+        isRecommended: context.isRecommended,
       });
 
       if (!result.success) {
-        toast.error(result.error);
+        toast.error(result.message);
         return;
       }
 
-      toast.success("상품이 수정되었습니다");
-      router.push(ROUTES.MANAGE_PRODUCT);
+      toast.success(result.message);
+      router.push("/admin/manage-product");
+      router.refresh();
     } catch (error) {
       console.error(error);
-      toast.error("상품 수정 중 오류가 발생했습니다");
+      toast.error("상품 수정에 실패했습니다.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-8">
       <section>
         <h2 className="mb-4 text-xl font-bold">메인 이미지</h2>
-        <ImagesUploader />
+        <EditImagesUploader />
       </section>
 
       <div className="h-0.5 bg-gray-300" />
 
       <section>
         <h2 className="mb-4 text-xl font-bold">상세 이미지</h2>
-        <DetailImagesUploader />
+        <EditDetailImagesUploader />
       </section>
 
       <div className="h-0.5 bg-gray-300" />
@@ -107,7 +151,7 @@ export default function EditProductForm() {
 
       <section>
         <h2 className="mb-4 text-xl font-bold">상품 카테고리</h2>
-        <CategorySelector />
+        <CategorySelector categories={initialCategories} />
       </section>
 
       <div className="h-0.5 bg-gray-300" />
@@ -133,6 +177,50 @@ export default function EditProductForm() {
 
       <div className="h-0.5 bg-gray-300" />
 
+      <div className="space-y-4 rounded-lg border p-4">
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">상품 설정</h2>
+          <div className="flex gap-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="isNew"
+                checked={context.isNew}
+                onCheckedChange={(checked) =>
+                  setContext((prev) => ({
+                    ...prev,
+                    isNew: checked === true,
+                  }))
+                }
+              />
+              <label
+                htmlFor="isNew"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                신제품
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="isRecommended"
+                checked={context.isRecommended}
+                onCheckedChange={(checked) =>
+                  setContext((prev) => ({
+                    ...prev,
+                    isRecommended: checked === true,
+                  }))
+                }
+              />
+              <label
+                htmlFor="isRecommended"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                추천 제품
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="pt-4">
         <button
           onClick={handleSubmit}
@@ -151,4 +239,4 @@ export default function EditProductForm() {
       </div>
     </div>
   );
-} 
+}

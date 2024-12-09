@@ -69,9 +69,14 @@ model Product {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
+  isNew Boolean @default(true)
+  isRecommended Boolean @default(false)
+
   orders Order[]
 
-  category String[]
+  category Category[]
+  subCategory SubCategory[]
+
   stock    Int     @default(0)
 
   productMainImages ProductMainImage[]
@@ -109,4 +114,53 @@ model ProductImage {
 
   @@index([productId])
   @@index([order])
+}
+
+model Notice {
+  id       Int    @id @default(autoincrement())
+  title    String
+  content  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Category {
+  id       Int    @id @default(autoincrement())
+  name     String
+  subCategory SubCategory[]
+  product Product[]
+
+  categoryThumbnail CategoryThumbnail[]
+
+  @@index([id])
+}
+
+model SubCategory {
+  id       Int    @id @default(autoincrement())
+  name     String
+  product Product[]
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+
+  categoryThumbnail CategoryThumbnail[]
+
+  @@index([categoryId])
+}
+
+
+model CategoryThumbnail {
+  id       Int    @id @default(autoincrement())
+  url      String
+  filename String
+  filetype String
+
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int?
+
+  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  subCategoryId Int?
+
+  @@index([categoryId])
+  @@index([subCategoryId])
 }

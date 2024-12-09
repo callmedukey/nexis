@@ -1,53 +1,64 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { ProductStatus } from "@prisma/client";
+import { createContext, useState } from "react";
+
+interface CategorySelection {
+  categoryId: number;
+  subCategoryIds: number[];
+}
 
 export interface ProductFormState {
   id?: number;
+  productMainImages: File[];
+  productImages: File[];
   name: string;
   description: string;
   price: number;
   options: string[];
-  delivery: "탁송" | "직수령";
+  delivery: boolean;
   discountRate: number;
-  category: string[];
+  categories: CategorySelection[];
   stock: number;
-  productMainImages: File[];
-  productImages: File[];
-  existingMainImages?: { id: number; url: string }[];
-  existingDetailImages?: { id: number; url: string }[];
+  existingMainImages?: Array<{ id: number; url: string }>;
+  existingDetailImages?: Array<{ id: number; url: string }>;
+  status: ProductStatus;
+  isNew: boolean;
+  isRecommended: boolean;
 }
 
 const initialState: ProductFormState = {
   name: "",
-  description: "",
   price: 0,
-  options: [],
-  delivery: "직수령",
   discountRate: 0,
-  category: [],
+  description: "",
+  status: ProductStatus.ACTIVE,
   stock: 0,
+  delivery: false,
+  options: [],
+  categories: [],
   productMainImages: [],
   productImages: [],
-  existingMainImages: [],
-  existingDetailImages: [],
+  isNew: true,
+  isRecommended: false,
 };
 
 export const Context = createContext<
   [ProductFormState, React.Dispatch<React.SetStateAction<ProductFormState>>]
 >([initialState, () => {}]);
 
+interface ContextProviderProps {
+  children: React.ReactNode;
+  initialData?: ProductFormState;
+}
+
 export default function ContextProvider({
   children,
   initialData,
-}: {
-  children: React.ReactNode;
-  initialData?: Partial<ProductFormState>;
-}) {
-  const [state, setState] = useState<ProductFormState>({
-    ...initialState,
-    ...initialData,
-  });
+}: ContextProviderProps) {
+  const [state, setState] = useState<ProductFormState>(
+    initialData ?? initialState
+  );
 
   return (
     <Context.Provider value={[state, setState]}>{children}</Context.Provider>

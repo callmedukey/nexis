@@ -17,12 +17,17 @@ export const ROUTES = {
   MANAGE_VIEW: "/admin/manage-view",
   MANAGE_COUPONS: "/admin/manage-coupons",
   MANAGE_PRODUCT_ADD: "/admin/manage-product/add",
+  MANAGE_CATEGORY: "/admin/manage-category",
 };
 
 export const ADMIN_ROUTES = [
   {
     label: "상품 관리",
     url: ROUTES.MANAGE_PRODUCT,
+  },
+  {
+    label: "카테고리 관리",
+    url: ROUTES.MANAGE_CATEGORY,
   },
   {
     label: "주문 관리",
