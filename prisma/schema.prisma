@@ -10,6 +10,8 @@ datasource db {
 
 enum PurchaseStatus {
   PENDING
+  PENDING_DELIVERY
+  DELIVERING
   COMPLETED
   CANCELLED
 }
@@ -42,21 +44,31 @@ model User {
 }
 
 model Order {
-  id     String @id @default(uuid())
+  id     String @id
+
   user   User   @relation(fields: [userId], references: [id])
   userId String
 
   products Product[]
-
-  orderId String         @unique
-  status  PurchaseStatus
-
   orderContent Json
+
+  status  PurchaseStatus
+  price Int
+  discount Int
+
+  trackingNumber String?
+  trackingCompany String?
+
+  couponApplied Coupon? @relation(fields: [couponAppliedId], references: [id])
+  couponAppliedId Int?
+
+  isCanceled Boolean @default(false)
+  isRefunded Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, orderId])
+  @@index([userId, id])
 }
 
 model Product {
@@ -72,8 +84,8 @@ model Product {
   isNew Boolean @default(true)
   isRecommended Boolean @default(false)
 
-  orders Order[]
 
+  order Order[]
   category Category[]
   subCategory SubCategory[]
 
@@ -164,3 +176,45 @@ model CategoryThumbnail {
   @@index([categoryId])
   @@index([subCategoryId])
 }
+
+
+model Post {
+  id       Int    @id @default(autoincrement())
+  title    String
+  thumbnail PostThumbnail[]
+  content  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+}
+
+model PostThumbnail {
+  id       Int    @id @default(autoincrement())
+  url      String
+  filename String
+  filetype String
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId Int
+
+  @@index([postId])
+}
+
+model Coupon {
+  id       Int    @id @default(autoincrement())
+  code     String
+  active   Boolean @default(true)
+
+  flatDiscount Int?
+  discountRate Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+  orders Order[]
+}
+
+
+

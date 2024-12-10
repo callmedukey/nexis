@@ -130,7 +130,7 @@ const DetailImagesUploader = () => {
       const result = await deleteProductImage({
         id: typeof image.id === "string" ? parseInt(image.id) : image.id,
         type: "detail",
-        productId: context.id,
+        productId: context.id as number,
       });
 
       if (!result.success) {

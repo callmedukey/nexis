@@ -13,6 +13,7 @@ export const ROUTES = {
   EXPLORE: "/explore",
   ADMIN: "/admin",
   MANAGE_PRODUCT: "/admin/manage-product",
+  MANAGE_USER: "/admin/manage-user",
   MANAGE_ORDER: "/admin/manage-order",
   MANAGE_VIEW: "/admin/manage-view",
   MANAGE_COUPONS: "/admin/manage-coupons",
@@ -40,6 +41,10 @@ export const ADMIN_ROUTES = [
   {
     label: "쿠폰 관리",
     url: ROUTES.MANAGE_COUPONS,
+  },
+  {
+    label: "회원 관리",
+    url: ROUTES.MANAGE_USER,
   },
 ];
 

@@ -1,6 +1,6 @@
 "server only";
 import crypto from "crypto";
-import { writeFile } from "fs/promises";
+import { writeFile, access, mkdir } from "fs/promises";
 import path from "path";
 
 export async function uploadImage(
@@ -41,7 +41,6 @@ export async function uploadImage(
 }
 
 async function createDirectoryIfNotExists(dir: string) {
-  const { access, mkdir } = await import("fs/promises");
   try {
     await access(dir);
   } catch {

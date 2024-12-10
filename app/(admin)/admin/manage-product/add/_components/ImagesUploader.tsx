@@ -4,9 +4,9 @@ import Image from "next/image";
 import { useContext, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
-import { FileUploader, FileInput } from "@/components/extension/file-uploader";
+import { FileUploader } from "@/components/extension/file-uploader";
 
-import { FileSvgDraw } from "./FileSvgDraw";
+import { FileInputWrapper } from "./FileInputWrapper";
 import { Context } from "../_providers/ContextProvider";
 
 const ImagesUploader = () => {
@@ -39,9 +39,11 @@ const ImagesUploader = () => {
         toast.error("최대 10개의 이미지만 ���로드할 수 있습니다");
         return;
       }
-      
-      const validFiles = acceptedFiles.filter(file => {
-        const isValidType = ["image/jpeg", "image/png", "image/gif"].includes(file.type);
+
+      const validFiles = acceptedFiles.filter((file) => {
+        const isValidType = ["image/jpeg", "image/png", "image/gif"].includes(
+          file.type
+        );
         if (!isValidType) {
           toast.error(`${file.name}은(는) 지원하지 않는 파일 형식입니다`);
           return false;
@@ -71,26 +73,16 @@ const ImagesUploader = () => {
     <div className="space-y-4">
       <FileUploader
         value={context.productMainImages}
-        onValueChange={(value) =>
+        onValueChange={(files: File[] | null) =>
           setContext((prev) => ({
             ...prev,
-            productMainImages: value ?? [],
+            productMainImages: files ?? [],
           }))
         }
         dropzoneOptions={dropZoneConfig}
-        className="relative rounded-lg border-2 border-dashed border-gray-300 bg-background p-4 hover:border-gray-400 transition-colors"
+        className="relative rounded-lg border-2 border-black bg-background p-2"
       >
-        <FileInput className="min-h-[120px] flex items-center justify-center">
-          <div className="flex w-full flex-col items-center justify-center gap-2 py-4">
-            <FileSvgDraw />
-            <p className="text-sm text-muted-foreground">
-              이미지를 드래그하거나 클릭하여 업로드하세요
-            </p>
-            <p className="text-xs text-muted-foreground">
-              (최대 10개, 파일당 5MB 이하, JPG/PNG/GIF)
-            </p>
-          </div>
-        </FileInput>
+        <FileInputWrapper />
       </FileUploader>
 
       {imageUrls.length > 0 ? (

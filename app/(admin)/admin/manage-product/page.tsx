@@ -42,6 +42,7 @@ const searchParamsSchema = z.object({
     .optional(),
   page: z.coerce.number().min(1).optional().default(1),
   query: z.string().optional(),
+  filter: z.enum(["recommended", "new"]).optional(),
 });
 
 export default async function Page({
@@ -62,6 +63,7 @@ export default async function Page({
     status: params.status,
     page: params.page,
     query: params.query,
+    filter: params.filter,
   });
 
   const {
@@ -70,6 +72,7 @@ export default async function Page({
     status: parsedStatus,
     page: parsedPage,
     query: parsedQuery,
+    filter: parsedFilter,
   } = result.success
     ? result.data
     : {
@@ -78,6 +81,7 @@ export default async function Page({
         status: undefined,
         page: 1,
         query: undefined,
+        filter: undefined,
       };
 
   const where = {
@@ -96,6 +100,8 @@ export default async function Page({
           },
         }
       : {}),
+    ...(parsedFilter === "recommended" ? { isRecommended: true } : {}),
+    ...(parsedFilter === "new" ? { isNew: true } : {}),
   };
 
   // Get total count for pagination
@@ -155,7 +161,7 @@ export default async function Page({
   });
 
   const createQueryString = (newPage: number) => {
-    const params = new URLSearchParams();
+  const params = new URLSearchParams();
     if (parsedCategoryId) params.set("categoryId", parsedCategoryId.toString());
     if (parsedSubCategoryId)
       params.set("subCategoryId", parsedSubCategoryId.toString());
@@ -176,6 +182,14 @@ export default async function Page({
     }`;
   };
 
+  const createMainPageLink = (filter: "recommended" | "new") => {
+    const params = new URLSearchParams();
+    params.set("filter", filter);
+    if (parsedStatus) params.set("status", parsedStatus);
+    if (parsedQuery) params.set("query", parsedQuery);
+    return `/admin/manage-product?${params.toString()}`;
+  };
+
   return (
     <main className="min-h-screen bg-lightgray">
       <div className="flex min-w-0 flex-col gap-4 px-4 py-8 md:flex-row">
@@ -192,7 +206,18 @@ export default async function Page({
                 <AccordionContent>
                   <ul className="space-y-4 pl-12 [&>li]:text-base">
                     {MAIN_PAGE_LISTINGS.map((listing) => (
-                      <li key={listing.value}>{listing.label}</li>
+                      <li key={listing.value}>
+                        <Link
+                          href={createMainPageLink(listing.value)}
+                          className={cn(
+                            "hover:bg-gray-100 rounded-md px-2 py-1 transition-colors",
+                            parsedFilter === listing.value &&
+                              "bg-primary text-primary-foreground hover:bg-primary/90"
+                          )}
+                        >
+                          {listing.label}
+                        </Link>
+                      </li>
                     ))}
                   </ul>
                 </AccordionContent>

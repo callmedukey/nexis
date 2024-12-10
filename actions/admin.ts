@@ -1,10 +1,11 @@
 "use server";
 
+import { unlink } from "fs/promises";
+import path, { join } from "path";
+
 import { ProductStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { unlink } from "fs/promises";
-import { join } from "path";
 
 import { auth } from "@/auth";
 import { productSchema } from "@/lib/constants/zod";
@@ -55,6 +56,8 @@ export async function createProduct(
         subCategory: {
           connect: data.subCategory.map((id) => ({ id: Number(id) })),
         },
+        isNew: data.isNew,
+        isRecommended: data.isRecommended,
         stock: data.stock,
         options: data.options,
         delivery: data.delivery,
@@ -245,6 +248,20 @@ export async function deleteProducts(
       };
     }
 
+    // First, get all images associated with these products
+    const products = await prisma.product.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      include: {
+        productMainImages: true,
+        productImages: true,
+      },
+    });
+
+    // Delete the products from the database
     await prisma.product.deleteMany({
       where: {
         id: {
@@ -252,6 +269,33 @@ export async function deleteProducts(
         },
       },
     });
+
+    // After successful DB deletion, delete the files
+    const deletePromises: Promise<void>[] = [];
+    products.forEach((product) => {
+      // Delete main images
+      product.productMainImages.forEach((image) => {
+        const filePath = join(process.cwd(), "public", image.url);
+        deletePromises.push(
+          unlink(filePath).catch((error) => {
+            console.error(`Failed to delete file: ${filePath}`, error);
+          })
+        );
+      });
+
+      // Delete detail images
+      product.productImages.forEach((image) => {
+        const filePath = join(process.cwd(), "public", image.url);
+        deletePromises.push(
+          unlink(filePath).catch((error) => {
+            console.error(`Failed to delete file: ${filePath}`, error);
+          })
+        );
+      });
+    });
+
+    // Wait for all file deletions to complete
+    await Promise.all(deletePromises);
 
     revalidatePath("/admin/manage-product");
     return {
@@ -287,9 +331,52 @@ export async function deleteProduct(
       };
     }
 
+    // First, get the product with its images
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        productMainImages: true,
+        productImages: true,
+      },
+    });
+
+    if (!product) {
+      return {
+        success: false,
+        message: "상품을 찾을 수 없습니다.",
+      };
+    }
+
+    // Delete from database
     await prisma.product.delete({
       where: { id },
     });
+
+    // After successful DB deletion, delete the files
+    const deletePromises: Promise<void>[] = [];
+
+    // Delete main images
+    product.productMainImages.forEach((image) => {
+      const filePath = join(process.cwd(), "public", image.url);
+      deletePromises.push(
+        unlink(filePath).catch((error) => {
+          console.error(`Failed to delete file: ${filePath}`, error);
+        })
+      );
+    });
+
+    // Delete detail images
+    product.productImages.forEach((image) => {
+      const filePath = join(process.cwd(), "public", image.url);
+      deletePromises.push(
+        unlink(filePath).catch((error) => {
+          console.error(`Failed to delete file: ${filePath}`, error);
+        })
+      );
+    });
+
+    // Wait for all file deletions to complete
+    await Promise.all(deletePromises);
 
     revalidatePath("/admin/manage-product");
     return {
@@ -446,6 +533,325 @@ export async function reorderProductImages(data: {
     return {
       success: false,
       message: "이미지 순서 변경에 실패했습니다.",
+    };
+  }
+}
+
+const postSchema = z.object({
+  title: z.string().min(1),
+  content: z.string().min(1),
+  thumbnailId: z.string().optional(),
+});
+
+export async function createPost(
+  data: z.infer<typeof postSchema>
+): Promise<ServerResponse<any>> {
+  try {
+    const session = await auth();
+    if (!session?.user.isAdmin) {
+      return {
+        success: false,
+        message: "관리자만 접근할 수 있습니다.",
+      };
+    }
+
+    const result = await postSchema.safeParseAsync(data);
+    if (!result.success) {
+      return {
+        success: false,
+        message: "Invalid input data",
+        errors: result.error.flatten().fieldErrors,
+      };
+    }
+
+    const thumbnailIds = result.data.thumbnailId?.split(",").filter(Boolean);
+
+    const post = await prisma.post.create({
+      data: {
+        title: result.data.title,
+        content: result.data.content,
+        thumbnail: thumbnailIds?.length
+          ? {
+              create: thumbnailIds.map((filename) => ({
+                url: `/uploads/posts/${filename}`,
+                filename,
+                filetype: filename.split(".").pop() || "png",
+              })),
+            }
+          : undefined,
+      },
+      include: {
+        thumbnail: true,
+      },
+    });
+
+    revalidatePath("/admin/manage-view");
+    return {
+      success: true,
+      message: "게시물이 생성되었습니다.",
+      data: post,
+    };
+  } catch (error) {
+    console.error("Post creation failed:", error);
+    return {
+      success: false,
+      message: "게시물 생성에 실패했습니다.",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+export async function updatePost(
+  id: number,
+  data: z.infer<typeof postSchema>
+): Promise<ServerResponse<any>> {
+  try {
+    const session = await auth();
+    if (!session?.user.isAdmin) {
+      return {
+        success: false,
+        message: "관리자만 접근할 수 있습니다.",
+      };
+    }
+
+    const result = await postSchema.safeParseAsync(data);
+    if (!result.success) {
+      return {
+        success: false,
+        message: "Invalid input data",
+        errors: result.error.flatten().fieldErrors,
+      };
+    }
+
+    const thumbnailIds = result.data.thumbnailId?.split(",").filter(Boolean);
+
+    // First, delete all existing thumbnails
+    await prisma.postThumbnail.deleteMany({
+      where: { postId: id },
+    });
+
+    const post = await prisma.post.update({
+      where: { id },
+      data: {
+        title: result.data.title,
+        content: result.data.content,
+        thumbnail: thumbnailIds?.length
+          ? {
+              create: thumbnailIds.map((filename) => ({
+                url: `/uploads/posts/${filename}`,
+                filename,
+                filetype: filename.split(".").pop() || "png",
+              })),
+            }
+          : undefined,
+      },
+      include: {
+        thumbnail: true,
+      },
+    });
+
+    revalidatePath("/admin/manage-view");
+    return {
+      success: true,
+      message: "게시물이 수정되었습니다.",
+      data: post,
+    };
+  } catch (error) {
+    console.error("Post update failed:", error);
+    return {
+      success: false,
+      message: "게시물 수정에 실패했습니다.",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+export async function deletePost(postIds: number[]): Promise<ServerResponse> {
+  try {
+    const session = await auth();
+    if (!session?.user.isAdmin) {
+      return {
+        success: false,
+        message: "관리자만 접근할 수 있습니다.",
+      };
+    }
+
+    // Delete posts and their thumbnails
+    for (const postId of postIds) {
+      const post = await prisma.post.findUnique({
+        where: { id: postId },
+        include: { thumbnail: true },
+      });
+
+      if (post) {
+        // Delete thumbnail files
+        for (const thumbnail of post.thumbnail) {
+          try {
+            const filePath = path.join(process.cwd(), "public", thumbnail.url);
+            await unlink(filePath);
+          } catch (error) {
+            console.error(
+              `Failed to delete thumbnail file for post ${postId}:`,
+              error
+            );
+          }
+        }
+
+        // Delete post and related records
+        await prisma.post.delete({ where: { id: postId } });
+      }
+    }
+
+    revalidatePath("/admin/manage-view");
+    return {
+      success: true,
+      message: "게시물이 삭제되었습니다.",
+    };
+  } catch (error) {
+    console.error("Post deletion failed:", error);
+    return {
+      success: false,
+      message: "게시물 삭제에 실패했습니다.",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+export async function getPost(postId: number) {
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      include: {
+        thumbnail: true,
+      },
+    });
+
+    if (!post) {
+      return { success: false, message: "게시물을 찾을 수 없습니다" };
+    }
+
+    return { success: true, data: post };
+  } catch (error) {
+    console.error("[GET_POST]", error);
+    return { success: false, message: "게시물을 불러오는데 실패했습니다" };
+  }
+}
+
+export async function getPosts(params: {
+  page?: number;
+  limit?: number;
+  query?: string;
+}) {
+  try {
+    const { page = 1, limit = 100, query } = params;
+    const skip = (page - 1) * limit;
+
+    const where = query
+      ? {
+          OR: [
+            { title: { contains: query, mode: "insensitive" as const } },
+            { content: { contains: query, mode: "insensitive" as const } },
+          ],
+        }
+      : {};
+
+    const [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        where,
+        include: {
+          thumbnail: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.post.count({ where }),
+    ]);
+
+    return {
+      success: true,
+      data: {
+        posts,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  } catch (error) {
+    console.error("[GET_POSTS]", error);
+    return { success: false, message: "게시물 목록을 불러오는데 실패했습니다" };
+  }
+}
+
+export async function uploadPostImages(files: File[]) {
+  try {
+    const uploadPromises = files.map((file) => uploadImage(file, "posts"));
+    const uploadResults = await Promise.all(uploadPromises);
+    return {
+      success: true,
+      data: uploadResults,
+    } satisfies ServerResponse<{ url: string; filename: string }[]>;
+  } catch (error) {
+    console.error("Image upload failed:", error);
+    return {
+      success: false,
+      message: "Failed to upload images",
+      error: error instanceof Error ? error.message : "Unknown error",
+    } satisfies ServerResponse;
+  }
+}
+
+export async function deletePostThumbnail(data: {
+  id: number;
+  postId: number;
+}): Promise<ServerResponse<void>> {
+  try {
+    const session = await auth();
+    if (!session?.user.isAdmin) {
+      return {
+        success: false,
+        message: "관리자만 접근할 수 있습니다.",
+      };
+    }
+
+    // First get the image to get its URL
+    const thumbnail = await prisma.postThumbnail.findUnique({
+      where: { id: data.id },
+    });
+
+    if (!thumbnail) {
+      return {
+        success: false,
+        message: "이미지를 찾을 수 없습니다.",
+      };
+    }
+
+    // Delete from database
+    await prisma.postThumbnail.delete({
+      where: { id: data.id },
+    });
+
+    // Delete from filesystem
+    const filePath = join(process.cwd(), "public", thumbnail.url);
+    try {
+      await unlink(filePath);
+    } catch (error) {
+      console.error(`Failed to delete file: ${filePath}`, error);
+      // Don't throw error here as DB deletion was successful
+    }
+
+    revalidatePath(`/admin/manage-view/${data.postId}`);
+    return {
+      success: true,
+      message: "이미지가 삭제되었습니다.",
+    };
+  } catch (error) {
+    console.error("Thumbnail deletion failed:", error);
+    return {
+      success: false,
+      message: "이미지 삭제에 실패했습니다.",
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
