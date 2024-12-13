@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 
 import { auth } from "@/auth";
 import Header from "@/components/layout/Header";
+import { SearchBar } from "@/components/layout/SearchBar";
 import { Toaster } from "@/components/ui/sonner";
 
 const notoSans = NotoSans({
@@ -27,8 +28,14 @@ export default async function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <SessionProvider session={session}>
-        <body className={`${notoSans.variable} antialiased`} suppressHydrationWarning>
+        <body
+          className={`${notoSans.variable} antialiased`}
+          suppressHydrationWarning
+        >
           <Header />
+          <div className="py-4">
+            <SearchBar />
+          </div>
           {children}
           <Toaster position="top-center" />
         </body>

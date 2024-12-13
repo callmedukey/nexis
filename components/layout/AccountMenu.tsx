@@ -37,7 +37,7 @@ const AccountMenu = () => {
         <DropdownMenuSeparator />
         {session && session?.data && session?.data?.user
           ? AUTH_ACCOUNT_ROUTES.map((link) => {
-              if (link.url === "/logout") {
+              if (link.url === ROUTES.LOGOUT) {
                 return (
                   <DropdownMenuItem key={link.label}>
                     <SignOutButton />

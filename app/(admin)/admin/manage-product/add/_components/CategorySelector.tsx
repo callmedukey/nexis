@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-import { Context } from "../_providers/ContextProvider";
+import { Context, ProductFormState } from "../_providers/ContextProvider";
 
 interface CategoryWithSub extends Category {
   subCategory: SubCategory[];
@@ -206,13 +206,13 @@ const CategorySelector = ({ categories }: CategorySelectorProps) => {
             카테고리 선택
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[400px] p-0" align="start">
-          <Command shouldFilter={false}>
+        <PopoverContent className="w-[400px] p-0 max-h-[85vh] overflow-hidden" align="start">
+          <Command shouldFilter={false} className="max-h-full">
             <CommandInput
               placeholder="카테고리 검색..."
               className="h-12 text-base"
             />
-            <CommandList className="max-h-[400px]">
+            <CommandList className="max-h-[calc(85vh-4rem)] overflow-y-auto">
               <CommandEmpty>검색 결과가 없습니다</CommandEmpty>
               {categories?.map((category) => {
                 const isInContext = isCategoryInContext(category.id);

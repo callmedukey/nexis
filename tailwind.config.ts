@@ -1,7 +1,15 @@
 import fluid, { extract, screens, fontSize } from "fluid-tailwind";
 import type { Config } from "tailwindcss";
 
-import { ICONGRAY, LIGHTGRAY, PRIMARYBLUE } from "./constants/general";
+import {
+  ICONGRAY,
+  LIGHTGRAY,
+  PRIMARYBLACK,
+  PRIMARYBLUE,
+  OTHERGRAY,
+  ANOTHERBLUE,
+  PRIMARYRED,
+} from "./constants/general";
 
 export default {
   darkMode: ["class"],
@@ -32,7 +40,11 @@ export default {
         foreground: "hsl(var(--foreground))",
         icongray: ICONGRAY,
         lightgray: LIGHTGRAY,
+        othergray: OTHERGRAY,
         primaryblue: PRIMARYBLUE,
+        anotherblue: ANOTHERBLUE,
+        primaryblack: PRIMARYBLACK,
+        primaryred: PRIMARYRED,
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

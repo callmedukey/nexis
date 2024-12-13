@@ -5,13 +5,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
 import { Input } from "@/components/ui/input";
-import { useDebounce } from "@/app/hooks/use-debounce";
+import { useDebounce } from "@/lib/hooks/use-debounce";
 
 export function SearchInput() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const createQueryString = useDebounce((term: string) => {
     const params = new URLSearchParams(searchParams);
@@ -37,4 +37,4 @@ export function SearchInput() {
       />
     </div>
   );
-} 
+}

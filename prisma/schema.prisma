@@ -14,6 +14,7 @@ enum PurchaseStatus {
   DELIVERING
   COMPLETED
   CANCELLED
+  CANCELLING
 }
 
 enum ProductStatus {
@@ -36,9 +37,12 @@ model User {
   email     String?
   phone     String?
   address   String?
+  detailedAddress   String?
   zipcode   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  cart   Cart?
 
   @@index([providerId])
 }
@@ -96,6 +100,8 @@ model Product {
   options           String[]
 
   delivery Boolean @default(false)
+
+  cartItems CartItem[]
 
   @@index([id])
 }
@@ -181,12 +187,45 @@ model CategoryThumbnail {
 model Post {
   id       Int    @id @default(autoincrement())
   title    String
-  thumbnail PostThumbnail[]
   content  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  readCount Int @default(0)
+
+  busCategory BusCategory[]
+  thumbnail PostThumbnail[]
+
   @@index([id])
+}
+
+model Events {
+  id       Int    @id @default(autoincrement())
+  title    String
+  content  String?
+
+  active Boolean @default(true)
+
+  thumbnail EventsThumbnail[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EventsThumbnail {
+  id       Int    @id @default(autoincrement())
+  url      String
+  filename String
+  filetype String
+
+  events Events @relation(fields: [eventsId], references: [id], onDelete: Cascade)
+  eventsId Int
+}
+
+model BusCategory {
+  id       Int    @id @default(autoincrement())
+  name     String
+  post Post[]
 }
 
 model PostThumbnail {
@@ -203,7 +242,7 @@ model PostThumbnail {
 
 model Coupon {
   id       Int    @id @default(autoincrement())
-  code     String
+  code     String @unique
   active   Boolean @default(true)
 
   flatDiscount Int?
@@ -214,6 +253,35 @@ model Coupon {
 
   @@index([id])
   orders Order[]
+}
+
+model Cart {
+  id        String   @id @default(uuid())
+
+  user      User     @relation(fields: [providerId], references: [providerId], onDelete: Cascade)
+  providerId    String   @unique // One user can have only one cart
+
+  items     CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerId])
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId    String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  quantity  Int
+  selectedOption    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cartId])
+  @@index([productId])
 }
 
 

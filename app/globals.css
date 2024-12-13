@@ -33,6 +33,7 @@
     --icongray: #484848;
     --lightgray: #ededed;
     --primary-blue: #326cff;
+    --primary-black: #111111;
   }
   .dark {
     --background: 0 0% 3.9%;

@@ -5,13 +5,13 @@ export const ROUTES = {
   LOGIN: "/login",
   SIGNUP: "/signup",
   LOGOUT: "/logout",
-  AFTER_LOGIN: "/after-login",
   ACCOUNT: "/account",
-  PURCHASES: "/purchases",
-  PROFILE: "/profile",
+  PURCHASES: "/account/history",
+  PROFILE: "/account/profile",
   PRODUCTS: "/products",
   EXPLORE: "/explore",
   ADMIN: "/admin",
+  CS: "/customer-service",
   MANAGE_PRODUCT: "/admin/manage-product",
   MANAGE_USER: "/admin/manage-user",
   MANAGE_ORDER: "/admin/manage-order",
@@ -19,6 +19,7 @@ export const ROUTES = {
   MANAGE_COUPONS: "/admin/manage-coupons",
   MANAGE_PRODUCT_ADD: "/admin/manage-product/add",
   MANAGE_CATEGORY: "/admin/manage-category",
+  MANAGE_EVENTS: "/admin/manage-events",
 };
 
 export const ADMIN_ROUTES = [
@@ -46,12 +47,17 @@ export const ADMIN_ROUTES = [
     label: "회원 관리",
     url: ROUTES.MANAGE_USER,
   },
+  {
+    label: "이벤트 관리",
+    url: ROUTES.MANAGE_EVENTS,
+  },
 ];
 
 export const AUTH_ACCOUNT_ROUTES = [
   { label: "마이 페이지", url: ROUTES.ACCOUNT },
   { label: "구매 내역", url: ROUTES.PURCHASES },
   { label: "게정 관리", url: ROUTES.PROFILE },
+  { label: "고객센터", url: ROUTES.CS },
   { label: "로그아웃", url: ROUTES.LOGOUT },
 ];
 
@@ -69,3 +75,7 @@ export const HEADER_ROUTES = [
 export const ICONGRAY = "#484848";
 export const LIGHTGRAY = "#EDEDED";
 export const PRIMARYBLUE = "#326cff";
+export const ANOTHERBLUE = "#0058A3";
+export const PRIMARYBLACK = "#111111";
+export const OTHERGRAY = "#F5F5F5";
+export const PRIMARYRED = "#CC0008";

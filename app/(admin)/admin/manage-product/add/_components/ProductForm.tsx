@@ -20,8 +20,14 @@ import ProductOptions from "./ProductOptions";
 import ProductTitle from "./ProductTitle";
 import { Context } from "../_providers/ContextProvider";
 
+import { Category, SubCategory } from "@prisma/client";
+
+interface CategoryWithSub extends Category {
+  subCategory: SubCategory[];
+}
+
 interface ProductFormProps {
-  initialCategories: any[]; // We'll type this properly
+  initialCategories: CategoryWithSub[]; // Properly typed now
 }
 
 export default function ProductForm({ initialCategories }: ProductFormProps) {

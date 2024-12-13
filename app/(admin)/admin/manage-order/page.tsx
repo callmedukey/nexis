@@ -1,4 +1,8 @@
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
+
+import { auth } from "@/auth";
+import { ROUTES } from "@/constants/general";
 
 import { OrderList } from "./_components/OrderList";
 import { OrderListSkeleton } from "./_components/OrderListSkeleton";
@@ -15,6 +19,12 @@ interface PageProps {
 }
 
 export default async function ManageOrderPage({ searchParams }: PageProps) {
+  const session = await auth();
+
+  if (!session || !session.user.isAdmin) {
+    redirect(ROUTES.HOME);
+  }
+
   const awaitedSearchParams = await searchParams;
   return (
     <div className="space-y-4 p-6">

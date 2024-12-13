@@ -2,7 +2,7 @@ import { ShoppingCartIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { ICONGRAY } from "@/constants/general";
+import { ICONGRAY, ROUTES } from "@/constants/general";
 import Logo from "@/public/logo.svg";
 
 import AccountMenu from "./AccountMenu";
@@ -18,7 +18,10 @@ const Header = () => {
           <Link href="/" className="hidden hover:underline lg:block">
             홈
           </Link>
-          <Link href="/" className="hidden hover:underline lg:block">
+          <Link
+            href={ROUTES.PRODUCTS}
+            className="hidden hover:underline lg:block"
+          >
             제품
           </Link>
           <Link href="/" className="hidden hover:underline lg:block">
@@ -26,7 +29,7 @@ const Header = () => {
           </Link>
           <div className="flex items-center gap-2">
             <AccountMenu />
-            <Link href="/">
+            <Link href="/cart" aria-label="View shopping cart">
               <ShoppingCartIcon color={ICONGRAY} className="size-6" />
             </Link>
             <MobileMenu />

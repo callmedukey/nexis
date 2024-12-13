@@ -78,6 +78,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             data: {
               providerId: userId,
               provider: account?.provider as string,
+              name: profile?.name as string,
+              email: profile?.email as string,
+              phone: profile?.phone as string,
             },
           });
         }

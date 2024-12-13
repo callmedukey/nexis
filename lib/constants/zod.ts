@@ -30,7 +30,7 @@ export const productSchema = z.object({
           "지원되는 이미지 형식: SVG, PNG, JPG, JPEG, GIF, WebP, AVIF"
         )
     )
-    .min(1, "메인 이미지를 한 개 이상 업로드해주세요"),
+    .min(1, "메인 이미지를 한 개 이상 업로���해주세요"),
   productImages: z
     .array(
       z
@@ -49,3 +49,18 @@ export const productSchema = z.object({
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;
+
+export const UserProfileSchema = z.object({
+  name: z.string().min(1, "고객명을 입력해주세요"),
+  email: z.string().email("올바른 이메일을 입력해주세요"),
+  phone: z.string().min(1, "연락처를 입력해주세요"),
+});
+
+export const AddressSchema = z.object({
+  address: z.string().min(1, "주소를 입력해주세요"),
+  detailedAddress: z.string().optional(),
+  zipcode: z.string().min(1, "상세 주소를 입력해주세요"),
+});
+
+export type UserProfileData = z.infer<typeof UserProfileSchema>;
+export type AddressData = z.infer<typeof AddressSchema>;

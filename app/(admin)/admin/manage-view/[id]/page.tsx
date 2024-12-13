@@ -19,13 +19,20 @@ export default async function Page({ params }: Props) {
 
   const { id } = await params;
 
+  // Fetch business categories for the form
+  const busCategories = await prisma.busCategory.findMany({
+    orderBy: {
+      id: "asc",
+    },
+  });
+
   // Handle the "new" route
   if (id === "new") {
     return (
       <main className="min-h-screen bg-lightgray">
         <div className="p-8">
           <div className="rounded-lg bg-white p-4 md:p-8">
-            <PostForm />
+            <PostForm busCategories={busCategories} />
           </div>
         </div>
       </main>
@@ -38,6 +45,7 @@ export default async function Page({ params }: Props) {
     },
     include: {
       thumbnail: true,
+      busCategory: true,
     },
   });
 
@@ -49,7 +57,7 @@ export default async function Page({ params }: Props) {
     <main className="min-h-screen bg-lightgray">
       <div className="p-8">
         <div className="rounded-lg bg-white p-4 md:p-8">
-          <PostForm initialData={post} />
+          <PostForm initialData={post} busCategories={busCategories} />
         </div>
       </div>
     </main>

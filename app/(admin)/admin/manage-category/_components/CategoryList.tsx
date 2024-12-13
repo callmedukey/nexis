@@ -17,21 +17,17 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-interface CategoryWithRelations extends Category {
-  subCategory: (SubCategory & {
-    categoryThumbnail: CategoryThumbnail[];
-  })[];
-  categoryThumbnail: CategoryThumbnail[];
-}
-
 interface CategoryListProps {
-  categories: CategoryWithRelations[];
+  categories: (Category & {
+    subCategory: (SubCategory & { categoryThumbnail: { url: string }[] })[];
+    categoryThumbnail: { url: string }[];
+  })[];
   onAddCategory: () => void;
-  onEditCategory: (category: Category) => void;
-  onDeleteCategory: (categoryId: number) => void;
+  onEditCategory: (category: Category & { categoryThumbnail: { url: string }[] }) => void;
+  onDeleteCategory: (id: number) => void;
   onAddSubCategory: (categoryId: number) => void;
-  onEditSubCategory: (subCategory: SubCategory) => void;
-  onDeleteSubCategory: (subCategoryId: number) => void;
+  onEditSubCategory: (subCategory: SubCategory & { categoryThumbnail: { url: string }[] }) => void;
+  onDeleteSubCategory: (id: number) => void;
 }
 
 export function CategoryList({

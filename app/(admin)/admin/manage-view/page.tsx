@@ -2,8 +2,15 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { auth } from "@/auth";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import prisma from "@/lib/prisma";
 
+import { BusCategoryManager } from "./_components/BusCategoryManager";
 import { PostListContainer } from "./_components/PostListContainer";
 
 const searchParamsSchema = z.object({
@@ -38,19 +45,42 @@ export default async function Page({ searchParams }: Props) {
       }
     : {};
 
-  const posts = await prisma.post.findMany({
-    where,
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      thumbnail: true,
-    },
-  });
+  const [posts, busCategories] = await Promise.all([
+    prisma.post.findMany({
+      where,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        thumbnail: true,
+        busCategory: true,
+      },
+    }),
+    prisma.busCategory.findMany({
+      orderBy: {
+        id: "asc",
+      },
+    }),
+  ]);
 
   return (
     <main className="min-h-screen bg-lightgray pb-24">
-      <div className="p-8">
+      <div className="space-y-8 p-8">
+        <div className="rounded-lg bg-white p-4 md:p-8">
+          <Accordion type="single" collapsible>
+            <AccordionItem value="categories">
+              <AccordionTrigger className="items-center text-2xl font-bold hover:no-underline">
+                <div className="flex w-full items-center justify-between">
+                  <span>게시물 카테고리 관리</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-8">
+                <BusCategoryManager initialCategories={busCategories} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
         <div className="rounded-lg bg-white p-4 md:p-8">
           <h1 className="mb-8 text-2xl font-bold">게시물 관리</h1>
           <PostListContainer posts={posts} query={parsedQuery} />

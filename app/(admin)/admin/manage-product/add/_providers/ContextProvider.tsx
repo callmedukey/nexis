@@ -1,7 +1,7 @@
 "use client";
 
 import { ProductStatus } from "@prisma/client";
-import { createContext, useState } from "react";
+import { Dispatch, SetStateAction, createContext, useState } from "react";
 
 interface CategorySelection {
   categoryId: number;
@@ -27,25 +27,26 @@ export interface ProductFormState {
   isRecommended: boolean;
 }
 
-const initialState: ProductFormState = {
-  name: "",
-  price: 0,
-  discountRate: 0,
-  description: "",
-  status: ProductStatus.ACTIVE,
-  stock: 0,
-  delivery: false,
-  options: [],
-  categories: [],
-  productMainImages: [],
-  productImages: [],
-  isNew: true,
-  isRecommended: false,
-};
+type ContextType = [ProductFormState, Dispatch<SetStateAction<ProductFormState>>];
 
-export const Context = createContext<
-  [ProductFormState, React.Dispatch<React.SetStateAction<ProductFormState>>]
->([initialState, () => {}]);
+export const Context = createContext<ContextType>([
+  {
+    name: "",
+    price: 0,
+    discountRate: 0,
+    description: "",
+    status: ProductStatus.ACTIVE,
+    stock: 0,
+    delivery: false,
+    options: [],
+    categories: [],
+    productMainImages: [],
+    productImages: [],
+    isNew: false,
+    isRecommended: false,
+  },
+  () => {},
+]);
 
 interface ContextProviderProps {
   children: React.ReactNode;
@@ -57,7 +58,21 @@ export default function ContextProvider({
   initialData,
 }: ContextProviderProps) {
   const [state, setState] = useState<ProductFormState>(
-    initialData ?? initialState
+    initialData ?? {
+      name: "",
+      price: 0,
+      discountRate: 0,
+      description: "",
+      status: ProductStatus.ACTIVE,
+      stock: 0,
+      delivery: false,
+      options: [],
+      categories: [],
+      productMainImages: [],
+      productImages: [],
+      isNew: false,
+      isRecommended: false,
+    }
   );
 
   return (
