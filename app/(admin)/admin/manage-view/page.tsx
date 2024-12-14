@@ -8,6 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { ROUTES } from "@/constants/general";
 import prisma from "@/lib/prisma";
 
 import { BusCategoryManager } from "./_components/BusCategoryManager";
@@ -24,7 +25,7 @@ interface Props {
 export default async function Page({ searchParams }: Props) {
   const session = await auth();
   if (!session?.user.isAdmin) {
-    redirect("/");
+    redirect(ROUTES.HOME);
   }
 
   const params = await searchParams;

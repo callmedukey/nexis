@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
@@ -95,13 +96,18 @@ export default async function HistoryPage({ searchParams }: PageProps) {
         <>
           <div className="w-full space-y-4">
             {orders.map((order) => {
-              const orderContent = order.orderContent as any[];
+              const orderContent = (order.orderContent as any).products;
               return (
                 <div key={order.id} className="space-y-4 rounded-lg border p-4">
-                  <div className="text-sm text-gray-500">
-                    {format(new Date(order.createdAt), "yyyy년 MM월 dd일", {
-                      locale: ko,
-                    })}
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-500">
+                      {format(new Date(order.createdAt), "yyyy년 MM월 dd일", {
+                        locale: ko,
+                      })}
+                    </div>
+                    <div className="text-sm font-medium">
+                      주문번호: {order.id}
+                    </div>
                   </div>
 
                   {orderContent.map((item: any, index: number) => {
@@ -110,18 +116,26 @@ export default async function HistoryPage({ searchParams }: PageProps) {
 
                     return (
                       <div key={item.id} className="flex gap-4">
-                        <div className="relative size-24 shrink-0">
+                        <Link
+                          href={`/products/${item.productId}`}
+                          className="relative size-24 shrink-0"
+                        >
                           <Image
                             src={mainImage || "/placeholder.png"}
                             alt={item.productName}
                             fill
-                            className="rounded-md object-cover"
+                            className="rounded-md object-cover transition-opacity hover:opacity-80"
                           />
-                        </div>
+                        </Link>
 
                         <div className="flex flex-1 flex-col justify-between">
                           <div>
-                            <h3 className="font-medium">{item.productName}</h3>
+                            <Link
+                              href={`/products/${item.productId}`}
+                              className="hover:underline"
+                            >
+                              <h3 className="font-medium">{item.productName}</h3>
+                            </Link>
                             <p className="text-sm text-gray-500">
                               {item.selectedOption &&
                                 `옵션: ${item.selectedOption}`}

@@ -1,14 +1,9 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Suspense } from "react";
+
 import prisma from "@/lib/prisma";
 
-import { Pagination } from "../../manage-product/_components/Pagination";
+import { UserListClient } from "./UserListClient";
+import { UserListSkeleton } from "./UserListSkeleton";
 
 interface UserListProps {
   searchParams: {
@@ -17,21 +12,6 @@ interface UserListProps {
     phone?: string;
     name?: string;
   };
-}
-
-interface UserData {
-  id: string;
-  name: string | null;
-  email: string | null;
-  phone: string | null;
-  provider: string;
-  createdAt: Date;
-}
-
-interface UsersResponse {
-  users: UserData[];
-  total: number;
-  pages: number;
 }
 
 export async function UserList({ searchParams }: UserListProps) {
@@ -89,64 +69,21 @@ export async function UserList({ searchParams }: UserListProps) {
       prisma.user.count({ where }),
     ]);
 
-    const data: UsersResponse = {
-      users,
-      total,
-      pages: Math.ceil(total / limit),
-    };
-
     if (users.length === 0) {
       return <div>회원이 없습니다.</div>;
     }
 
     return (
-      <div className="space-y-4">
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>번호</TableHead>
-                <TableHead>이름</TableHead>
-                <TableHead>이메일</TableHead>
-                <TableHead>전화번호</TableHead>
-                <TableHead>계정 유형</TableHead>
-                <TableHead>가입일</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.users.map((user, index) => (
-                <TableRow key={user.id}>
-                  <TableCell>{skip + index + 1}</TableCell>
-                  <TableCell>{user.name || "-"}</TableCell>
-                  <TableCell>{user.email || "-"}</TableCell>
-                  <TableCell>{user.phone || "-"}</TableCell>
-                  <TableCell>
-                    {user.provider === "kakao" ? "Kakao" : "Naver"}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(user.createdAt).toLocaleDateString("ko-KR", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        <Pagination
-          totalPages={data.pages}
-          currentPage={page}
-          createQueryString={(page: number) => {
-            const params = new URLSearchParams(
-              searchParams as Record<string, string>
-            );
-            params.set("page", page.toString());
-            return params.toString();
-          }}
+      <Suspense fallback={<UserListSkeleton />}>
+        <UserListClient
+          users={users}
+          total={total}
+          page={page}
+          limit={limit}
+          skip={skip}
+          searchParams={searchParams}
         />
-      </div>
+      </Suspense>
     );
   } catch (error) {
     console.error("[USER_LIST]", error);

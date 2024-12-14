@@ -4,8 +4,8 @@ import { Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
-import { useDebounce } from "@/app/hooks/use-debounce";
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/lib/hooks/use-debounce";
 
 export function SearchInput() {
   const router = useRouter();

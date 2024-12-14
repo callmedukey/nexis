@@ -315,7 +315,7 @@ export const deleteSubCategory = async (
     console.error(error);
     return {
       success: false,
-      message: "하위 카테고리 삭제에 실패했습니다.",
+      message: "하위 카테고리 삭제�� 실패했습니다.",
     };
   }
 };
@@ -719,7 +719,7 @@ export async function updateProductStatus(
     console.error("Failed to update product status:", error);
     return {
       success: false,
-      message: "상품 상태 업데이트에 실패했습니다.",
+      message: "���품 상태 업데이트에 실패했습니다.",
     };
   }
 }
@@ -981,7 +981,7 @@ export async function deletePost(postIds: number[]): Promise<ServerResponse> {
     if (!session?.user.isAdmin) {
       return {
         success: false,
-        message: "관리자만 접근할 수 있���니다.",
+        message: "관리자만 접근할 수 있습니다.",
       };
     }
 
@@ -1185,7 +1185,7 @@ export async function createBusCategory(data: {
     if (!validated.success) {
       return {
         success: false,
-        message: "유효하지 ���은 값입니다.",
+        message: "유효하지 않은 값입니다.",
       };
     }
 
@@ -1271,7 +1271,7 @@ export async function deleteBusCategory(id: number): Promise<ServerResponse> {
     console.error(error);
     return {
       success: false,
-      message: "카테고��� 삭제에 실패했습니다.",
+      message: "카테고리 삭제에 실패했습니다.",
     };
   }
 }
@@ -1628,7 +1628,7 @@ export async function deleteCoupons(ids: number[]): Promise<ServerResponse> {
     revalidatePath("/admin/manage-coupons");
     return {
       success: true,
-      message: "선택한 쿠폰이 삭제되었습니다.",
+      message: "선택한 쿠폰이 삭제되었습���다.",
     };
   } catch (error) {
     console.error("Coupons deletion failed:", error);
@@ -1692,6 +1692,42 @@ export async function updateCoupon(data: {
     return {
       success: false,
       message: "쿠폰 수정에 실패했습니다.",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+// User Actions
+export async function deleteUsers(data: {
+  userIds: string[];
+}): Promise<ServerResponse<void>> {
+  try {
+    const session = await auth();
+    if (!session?.user.isAdmin) {
+      return {
+        success: false,
+        message: "관리자만 접근할 수 있습니다.",
+      };
+    }
+
+    await prisma.user.deleteMany({
+      where: {
+        id: {
+          in: data.userIds,
+        },
+      },
+    });
+
+    revalidatePath("/admin/manage-user");
+    return {
+      success: true,
+      message: "사용자가 삭제되었습니다.",
+    };
+  } catch (error) {
+    console.error("[DELETE_USERS]", error);
+    return {
+      success: false,
+      message: "사용자 삭제에 실패했습니다.",
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }

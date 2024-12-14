@@ -2,8 +2,8 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { useDebounce } from "@/app/hooks/use-debounce";
 import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/lib/hooks/use-debounce";
 
 export function SearchFilters() {
   const router = useRouter();
@@ -61,4 +61,4 @@ export function SearchFilters() {
       </div>
     </div>
   );
-} 
+}

@@ -1,18 +1,10 @@
 import { redirect } from "next/navigation";
 
+import { OrderSummary } from "@/app/cart/_components/OrderSummary";
 import { auth } from "@/auth";
 import { CartItem } from "@/components/cart/CartItem";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import prisma from "@/lib/prisma";
-import { OrderSummary } from "./_components/OrderSummary";
 
 async function getCart(userId: string) {
   return prisma.cart.findUnique({
