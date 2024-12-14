@@ -13,6 +13,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { OrderStatusKoreanMapping } from "@/constants/general";
 import prisma from "@/lib/prisma";
 
 import { CancelOrderButton } from "./_components/CancelOrderButton";
@@ -95,10 +96,13 @@ export default async function HistoryPage({ searchParams }: PageProps) {
       ) : (
         <>
           <div className="w-full space-y-4">
-            {orders.map((order) => {
+            {orders.map((order, i) => {
               const orderContent = (order.orderContent as any).products;
               return (
-                <div key={order.id} className="space-y-4 rounded-lg border p-4">
+                <div
+                  key={order.id + i}
+                  className="space-y-4 rounded-lg border p-4"
+                >
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-500">
                       {format(new Date(order.createdAt), "yyyy년 MM월 dd일", {
@@ -115,7 +119,10 @@ export default async function HistoryPage({ searchParams }: PageProps) {
                     const mainImage = product?.productMainImages[0]?.url;
 
                     return (
-                      <div key={item.id} className="flex gap-4">
+                      <div
+                        key={index + "i" + item?.productName}
+                        className="flex gap-4"
+                      >
                         <Link
                           href={`/products/${item.productId}`}
                           className="relative size-24 shrink-0"
@@ -134,7 +141,9 @@ export default async function HistoryPage({ searchParams }: PageProps) {
                               href={`/products/${item.productId}`}
                               className="hover:underline"
                             >
-                              <h3 className="font-medium">{item.productName}</h3>
+                              <h3 className="font-medium">
+                                {item.productName}
+                              </h3>
                             </Link>
                             <p className="text-sm text-gray-500">
                               {item.selectedOption &&
@@ -154,24 +163,9 @@ export default async function HistoryPage({ searchParams }: PageProps) {
 
                   <div className="flex items-center justify-between border-t pt-4">
                     <div className="text-sm font-medium">
-                      상태:{" "}
-                      {order.status === "PENDING"
-                        ? "결제대기"
-                        : order.status === "PENDING_DELIVERY"
-                        ? "배송준비"
-                        : order.status === "DELIVERING"
-                        ? "배송중"
-                        : order.status === "COMPLETED"
-                        ? "배송완료"
-                        : order.status === "CANCELLED"
-                        ? "취소됨"
-                        : order.status === "CANCELLING"
-                        ? "취소중"
-                        : ""}
+                      상태: {OrderStatusKoreanMapping[order.status]}
                     </div>
-                    {order.status === "PENDING_DELIVERY" && (
-                      <CancelOrderButton orderId={order.id} />
-                    )}
+                    <CancelOrderButton orderId={order.id} status={order.status} />
                   </div>
                 </div>
               );

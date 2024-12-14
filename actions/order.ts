@@ -1,9 +1,11 @@
 "use server";
 
-import { auth } from "@/auth";
-import prisma from "@/lib/prisma";
+import { PurchaseStatus } from "@prisma/client";
 import { format } from "date-fns";
 import { z } from "zod";
+
+import { auth } from "@/auth";
+import prisma from "@/lib/prisma";
 
 const submitOrderSchema = z.object({
   couponDiscount: z.number().min(0),
@@ -41,7 +43,7 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
 
     // Generate custom order ID (YYYYMMDD + 4 digits)
     const today = format(new Date(), "yyyyMMdd");
-    
+
     // Get the last order of the day to determine the sequence number
     const lastOrder = await prisma.order.findFirst({
       where: {
@@ -87,12 +89,12 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
             providerId: session.user.id,
           },
         },
-        status: "COMPLETED",
+        status: PurchaseStatus.PENDING,
         price: finalTotal,
         discount: couponDiscount,
         products: {
           connect: cart.items.map((item) => ({
-            id: item.productId
+            id: item.productId,
           })),
         },
         orderContent: {
@@ -100,15 +102,21 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
             productId: item.productId,
             productName: item.product.name,
             quantity: item.quantity,
-            price: Math.round(item.product.price * (1 - item.product.discount / 100)),
+            price: Math.round(
+              item.product.price * (1 - item.product.discount / 100)
+            ),
             originalPrice: item.product.price,
             selectedOption: item.selectedOption,
-            subTotalPrice: item.quantity * Math.round(item.product.price * (1 - item.product.discount / 100))
+            subTotalPrice:
+              item.quantity *
+              Math.round(
+                item.product.price * (1 - item.product.discount / 100)
+              ),
           })),
           totalAmount: finalTotal,
           originalAmount: originalTotal,
-          couponDiscount
-        }
+          couponDiscount,
+        },
       },
     });
 
@@ -127,4 +135,4 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
     console.error("Order submission error:", error);
     return { error: "Failed to submit order" };
   }
-} 
+}

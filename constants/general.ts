@@ -79,3 +79,20 @@ export const ANOTHERBLUE = "#0058A3";
 export const PRIMARYBLACK = "#111111";
 export const OTHERGRAY = "#F5F5F5";
 export const PRIMARYRED = "#CC0008";
+
+export const OrderStatusKoreanMapping = {
+  PENDING: "상품 준비중",
+  PENDING_DELIVERY: "배송 준비중",
+  DELIVERING: "배송중",
+  COMPLETED: "배송완료",
+  CANCELLED: "주문 취소",
+  CANCELLING: "취소 중",
+  RETURNING: "반품 중",
+};
+
+export const NotAllowedCancelStatus = [
+  OrderStatusKoreanMapping.CANCELLING,
+  OrderStatusKoreanMapping.CANCELLED,
+  OrderStatusKoreanMapping.COMPLETED,
+  OrderStatusKoreanMapping.DELIVERING,
+];

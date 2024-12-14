@@ -2,10 +2,10 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { auth } from "@/auth";
-import { ROUTES } from "@/constants/general";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ROUTES } from "@/constants/general";
 
 import { OrderList } from "./_components/OrderList";
 import { OrderListSkeleton } from "./_components/OrderListSkeleton";
@@ -32,7 +32,10 @@ export default async function ManageOrderPage({ searchParams }: PageProps) {
     <div className="space-y-4 p-6">
       <Card className="p-6">
         <div className="flex flex-col space-y-4">
-          <Tabs defaultValue={awaitedSearchParams.status || "ALL"} className="w-full">
+          <Tabs
+            defaultValue={awaitedSearchParams.status || "ALL"}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="ALL">전체</TabsTrigger>
               <TabsTrigger value="COMPLETED">결제완료</TabsTrigger>
@@ -42,7 +45,7 @@ export default async function ManageOrderPage({ searchParams }: PageProps) {
               <TabsTrigger value="CANCELLED">취소됨</TabsTrigger>
             </TabsList>
           </Tabs>
-          
+
           <div className="flex justify-end">
             <DatePickerWithRange />
           </div>

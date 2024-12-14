@@ -62,7 +62,7 @@ export function SearchBar() {
   // Don't show search bar in admin routes
   if (
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/products") ||
+    pathname.startsWith("/products/") ||
     pathname.startsWith("/account") ||
     pathname.startsWith("/explore")
   ) {

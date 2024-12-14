@@ -315,7 +315,7 @@ export const deleteSubCategory = async (
     console.error(error);
     return {
       success: false,
-      message: "하위 카테고리 삭제�� 실패했습니다.",
+      message: "하위 카테고리 삭제에 실패했습니다.",
     };
   }
 };
@@ -719,7 +719,7 @@ export async function updateProductStatus(
     console.error("Failed to update product status:", error);
     return {
       success: false,
-      message: "���품 상태 업데이트에 실패했습니다.",
+      message: "상품 상태 업데이트에 실패했습니다.",
     };
   }
 }
@@ -969,7 +969,7 @@ export async function updatePost(
     console.error("Post update failed:", error);
     return {
       success: false,
-      message: "게시물 수정에 실패했습니다.",
+      message: "게���물 수정에 실패했습니다.",
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }
@@ -1395,7 +1395,7 @@ export async function updateEvent(
     revalidatePath("/admin/manage-events");
     return {
       success: true,
-      message: "이벤트가 수정되었습니다.",
+      message: "이벤트��� 수정되었습니다.",
       data: event,
     };
   } catch (error) {
@@ -1628,7 +1628,7 @@ export async function deleteCoupons(ids: number[]): Promise<ServerResponse> {
     revalidatePath("/admin/manage-coupons");
     return {
       success: true,
-      message: "선택한 쿠폰이 삭제되었습���다.",
+      message: "선택한 쿠폰이 삭제되었습니다.",
     };
   } catch (error) {
     console.error("Coupons deletion failed:", error);
@@ -1729,6 +1729,38 @@ export async function deleteUsers(data: {
       success: false,
       message: "사용자 삭제에 실패했습니다.",
       error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+export async function updateOrderStatus(
+  orderId: string,
+  status: PurchaseStatus
+): Promise<ServerResponse> {
+  try {
+    const session = await auth();
+    if (!session?.user.isAdmin) {
+      return {
+        success: false,
+        message: "관리자만 접근할 수 있습니다.",
+      };
+    }
+
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status },
+    });
+
+    revalidatePath("/admin/manage-order");
+    return {
+      success: true,
+      message: "주문 상태가 업데이트되었습니다.",
+    };
+  } catch (error) {
+    console.error("Failed to update order status:", error);
+    return {
+      success: false,
+      message: "주문 상태 업데이트에 실패했습니다.",
     };
   }
 }

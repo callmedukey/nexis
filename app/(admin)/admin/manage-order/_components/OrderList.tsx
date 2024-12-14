@@ -2,6 +2,7 @@ import { PurchaseStatus } from "@prisma/client";
 import { format } from "date-fns";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 import {
   Popover,
@@ -17,6 +18,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import prisma from "@/lib/prisma";
+
+import { StatusSelect } from "./StatusSelect";
+import { TrackingInputs } from "./TrackingInputs";
 
 interface OrderListProps {
   searchParams: {
@@ -62,6 +66,8 @@ export async function OrderList({ searchParams }: OrderListProps) {
           user: {
             select: {
               name: true,
+              email: true,
+              phone: true,
             },
           },
           products: {
@@ -97,6 +103,7 @@ export async function OrderList({ searchParams }: OrderListProps) {
               <TableHead>품목</TableHead>
               <TableHead>주문상태</TableHead>
               <TableHead>결제상태</TableHead>
+              <TableHead>배송정보</TableHead>
               <TableHead className="text-right">실결제금액</TableHead>
               <TableHead>구매자</TableHead>
               <TableHead>주문일</TableHead>
@@ -134,28 +141,33 @@ export async function OrderList({ searchParams }: OrderListProps) {
                                 key={product.productId}
                                 className="flex items-start gap-3"
                               >
-                                <div className="relative size-16 overflow-hidden rounded-md">
-                                  <Image
-                                    src={imageUrl}
-                                    alt={product.productName}
-                                    fill
-                                    className="object-cover"
-                                    sizes="64px"
-                                  />
-                                </div>
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium">
-                                    {product.productName}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {product.quantity}개
-                                    {product.selectedOption &&
-                                      ` - ${product.selectedOption}`}
-                                  </p>
-                                  <p className="text-right text-sm font-medium">
-                                    {product.subTotalPrice.toLocaleString()}원
-                                  </p>
-                                </div>
+                                <Link
+                                  href={`/admin/manage-product/${product.productId}`}
+                                  className="group flex items-start gap-3 transition-opacity hover:opacity-75"
+                                >
+                                  <div className="relative size-16 overflow-hidden rounded-md">
+                                    <Image
+                                      src={imageUrl}
+                                      alt={product.productName}
+                                      fill
+                                      className="object-cover"
+                                      sizes="64px"
+                                    />
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium group-hover:underline">
+                                      {product.productName}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {product.quantity}개
+                                      {product.selectedOption &&
+                                        ` - ${product.selectedOption}`}
+                                    </p>
+                                    <p className="text-right text-sm font-medium">
+                                      {product.subTotalPrice.toLocaleString()}원
+                                    </p>
+                                  </div>
+                                </Link>
                               </div>
                             );
                           })}
@@ -164,17 +176,7 @@ export async function OrderList({ searchParams }: OrderListProps) {
                     </Popover>
                   </TableCell>
                   <TableCell>
-                    {order.status === "PENDING"
-                      ? "결제대기"
-                      : order.status === "PENDING_DELIVERY"
-                      ? "상품 준비중"
-                      : order.status === "DELIVERING"
-                      ? "배송중"
-                      : order.status === "COMPLETED"
-                      ? "배송완료"
-                      : order.status === "CANCELLED"
-                      ? "취소됨"
-                      : ""}
+                    <StatusSelect orderId={order.id} status={order.status} />
                   </TableCell>
                   <TableCell>
                     {order.isCanceled
@@ -183,10 +185,42 @@ export async function OrderList({ searchParams }: OrderListProps) {
                       ? "환불됨"
                       : "결제완료"}
                   </TableCell>
+                  <TableCell>
+                    <TrackingInputs
+                      orderId={order.id}
+                      initialTrackingCompany={order.trackingCompany}
+                      initialTrackingNumber={order.trackingNumber}
+                    />
+                  </TableCell>
                   <TableCell className="text-right">
                     {orderContent.totalAmount.toLocaleString()}원
                   </TableCell>
-                  <TableCell>{order.user.name}</TableCell>
+                  <TableCell>
+                    <Popover>
+                      <PopoverTrigger className="flex items-center gap-2">
+                        <span className="text-primary underline cursor-pointer">
+                          {order.user.name}
+                        </span>
+                        <ChevronDown className="size-4" />
+                      </PopoverTrigger>
+                      <PopoverContent className="w-60">
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-3 gap-2 text-sm">
+                            <span className="text-muted-foreground">이름</span>
+                            <span className="col-span-2 font-medium">{order.user.name || "-"}</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-sm">
+                            <span className="text-muted-foreground">이메일</span>
+                            <span className="col-span-2 font-medium">{order.user.email || "-"}</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-sm">
+                            <span className="text-muted-foreground">전화번호</span>
+                            <span className="col-span-2 font-medium">{order.user.phone || "-"}</span>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </TableCell>
                   <TableCell>
                     {format(new Date(order.createdAt), "yyyy-MM-dd")}
                   </TableCell>

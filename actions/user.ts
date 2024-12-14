@@ -1,6 +1,12 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { auth } from "@/auth";
+import {
+  NotAllowedCancelStatus,
+  OrderStatusKoreanMapping,
+} from "@/constants/general";
 import { AddressSchema, UserProfileSchema } from "@/lib/constants/zod";
 import prisma from "@/lib/prisma";
 
@@ -65,22 +71,28 @@ export const cancelOrder = async (orderId: string) => {
       where: {
         id: orderId,
         user: {
-          providerId: session.user.id
-        }
-      }
+          providerId: session.user.id,
+        },
+      },
     });
 
     if (!order) {
       return { success: false, message: "주문을 찾을 수 없습니다." };
     }
 
-    if (order.status !== "PENDING_DELIVERY") {
-      return { success: false, message: "배송 준비중인 주문만 취소할 수 있습니다." };
+    // Check if order status is in NotAllowedCancelStatus
+    if (
+      NotAllowedCancelStatus.includes(OrderStatusKoreanMapping[order.status])
+    ) {
+      return {
+        success: false,
+        message: "현재 상태에서는 주문을 취소할 수 없습니다.",
+      };
     }
 
     await prisma.order.update({
       where: { id: orderId },
-      data: { status: "CANCELLING" }
+      data: { status: "CANCELLING" },
     });
 
     revalidatePath("/account/history");

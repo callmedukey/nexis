@@ -15,6 +15,7 @@ enum PurchaseStatus {
   COMPLETED
   CANCELLED
   CANCELLING
+  RETURNING
 }
 
 enum ProductStatus {
