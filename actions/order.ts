@@ -185,7 +185,6 @@ export async function updateOrderStatus(
     if (!order) {
       return { error: "Order not found" };
     }
-    console.log(order, status);
     // If status is being changed to CANCELLED, restore stock
     if (status === PurchaseStatus.CANCELLED) {
       await prisma.$transaction(async (tx) => {
