@@ -165,7 +165,10 @@ export default async function HistoryPage({ searchParams }: PageProps) {
                     <div className="text-sm font-medium">
                       상태: {OrderStatusKoreanMapping[order.status]}
                     </div>
-                    <CancelOrderButton orderId={order.id} status={order.status} />
+                    <CancelOrderButton
+                      orderId={order.id}
+                      status={order.status}
+                    />
                   </div>
                 </div>
               );

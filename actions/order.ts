@@ -9,6 +9,13 @@ import prisma from "@/lib/prisma";
 
 const submitOrderSchema = z.object({
   couponDiscount: z.number().min(0),
+  deliveryInfo: z.object({
+    name: z.string(),
+    phone: z.string(),
+    address: z.string(),
+    detailedAddress: z.string(),
+    zipcode: z.string(),
+  }),
 });
 
 export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
@@ -39,6 +46,15 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
 
     if (!cart || !cart.items.length) {
       return { error: "Cart is empty" };
+    }
+
+    // Check stock availability for all items
+    for (const item of cart.items) {
+      if (item.product.stock < item.quantity) {
+        return {
+          error: `${item.product.name}의 재고가 부족합니다. 현재 재고: ${item.product.stock}개`,
+        };
+      }
     }
 
     // Generate custom order ID (YYYYMMDD + 4 digits)
@@ -80,44 +96,59 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
 
     const finalTotal = discountedTotal - couponDiscount;
 
-    // Create order
-    const order = await prisma.order.create({
-      data: {
-        id: orderId,
-        user: {
-          connect: {
-            providerId: session.user.id,
+    // Create order and update stock in a transaction
+    const order = await prisma.$transaction(async (tx) => {
+      // Update product stock
+      for (const item of cart.items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
           },
-        },
-        status: PurchaseStatus.PENDING,
-        price: finalTotal,
-        discount: couponDiscount,
-        products: {
-          connect: cart.items.map((item) => ({
-            id: item.productId,
-          })),
-        },
-        orderContent: {
-          products: cart.items.map((item) => ({
-            productId: item.productId,
-            productName: item.product.name,
-            quantity: item.quantity,
-            price: Math.round(
-              item.product.price * (1 - item.product.discount / 100)
-            ),
-            originalPrice: item.product.price,
-            selectedOption: item.selectedOption,
-            subTotalPrice:
-              item.quantity *
-              Math.round(
+        });
+      }
+
+      // Create the order
+      return await tx.order.create({
+        data: {
+          id: orderId,
+          user: {
+            connect: {
+              providerId: session.user.id,
+            },
+          },
+          status: PurchaseStatus.PENDING,
+          price: finalTotal,
+          discount: couponDiscount,
+          products: {
+            connect: cart.items.map((item) => ({
+              id: item.productId,
+            })),
+          },
+          orderContent: {
+            products: cart.items.map((item) => ({
+              productId: item.productId,
+              productName: item.product.name,
+              quantity: item.quantity,
+              price: Math.round(
                 item.product.price * (1 - item.product.discount / 100)
               ),
-          })),
-          totalAmount: finalTotal,
-          originalAmount: originalTotal,
-          couponDiscount,
+              originalPrice: item.product.price,
+              selectedOption: item.selectedOption,
+              subTotalPrice:
+                item.quantity *
+                Math.round(
+                  item.product.price * (1 - item.product.discount / 100)
+                ),
+            })),
+            totalAmount: finalTotal,
+            originalAmount: originalTotal,
+            couponDiscount,
+          },
         },
-      },
+      });
     });
 
     // Clear cart
@@ -134,5 +165,60 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
   } catch (error) {
     console.error("Order submission error:", error);
     return { error: "Failed to submit order" };
+  }
+}
+
+export async function updateOrderStatus(
+  orderId: string,
+  status: PurchaseStatus
+) {
+  const session = await auth();
+  if (!session?.user?.isAdmin) {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      return { error: "Order not found" };
+    }
+    console.log(order, status);
+    // If status is being changed to CANCELLED, restore stock
+    if (status === PurchaseStatus.CANCELLED) {
+      await prisma.$transaction(async (tx) => {
+        // Restore stock for each product
+        const products = (order.orderContent as any).products;
+        for (const item of products) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: {
+                increment: item.quantity,
+              },
+            },
+          });
+        }
+
+        // Update order status
+        await tx.order.update({
+          where: { id: orderId },
+          data: { status },
+        });
+      });
+    } else {
+      // Just update the status if not cancelling
+      await prisma.order.update({
+        where: { id: orderId },
+        data: { status },
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Order status update error:", error);
+    return { error: "Failed to update order status" };
   }
 }

@@ -19,6 +19,7 @@ async function getCart(userId: string) {
           },
         },
       },
+      user: true,
     },
   });
 }
@@ -46,6 +47,14 @@ export default async function CartPage() {
   );
 
   const totalDiscount = originalTotal - discountedTotal;
+
+  const userData = cart?.user ? {
+    name: cart.user.name,
+    phone: cart.user.phone,
+    address: cart.user.address,
+    detailedAddress: cart.user.detailedAddress,
+    zipcode: cart.user.zipcode,
+  } : undefined;
 
   return (
     <div className="container mx-auto p-4">
@@ -81,6 +90,7 @@ export default async function CartPage() {
               originalTotal={originalTotal}
               discountedTotal={discountedTotal}
               totalDiscount={totalDiscount}
+              userData={userData}
             />
           </div>
         </div>

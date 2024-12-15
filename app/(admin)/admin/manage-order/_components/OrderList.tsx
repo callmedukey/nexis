@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/table";
 import prisma from "@/lib/prisma";
 
-import { StatusSelect } from "./StatusSelect";
 import { TrackingInputs } from "./TrackingInputs";
+import { UpdateOrderStatus } from "./UpdateOrderStatus";
 
 interface OrderListProps {
   searchParams: {
@@ -163,7 +163,7 @@ export async function OrderList({ searchParams }: OrderListProps) {
                                       {product.selectedOption &&
                                         ` - ${product.selectedOption}`}
                                     </p>
-                                    <p className="text-right text-sm font-medium">
+                                    <p className="w-full text-left text-sm font-medium">
                                       {product.subTotalPrice.toLocaleString()}원
                                     </p>
                                   </div>
@@ -176,7 +176,10 @@ export async function OrderList({ searchParams }: OrderListProps) {
                     </Popover>
                   </TableCell>
                   <TableCell>
-                    <StatusSelect orderId={order.id} status={order.status} />
+                    <UpdateOrderStatus
+                      orderId={order.id}
+                      currentStatus={order.status}
+                    />
                   </TableCell>
                   <TableCell>
                     {order.isCanceled
@@ -198,7 +201,7 @@ export async function OrderList({ searchParams }: OrderListProps) {
                   <TableCell>
                     <Popover>
                       <PopoverTrigger className="flex items-center gap-2">
-                        <span className="text-primary underline cursor-pointer">
+                        <span className="cursor-pointer text-primary underline">
                           {order.user.name}
                         </span>
                         <ChevronDown className="size-4" />
@@ -207,15 +210,25 @@ export async function OrderList({ searchParams }: OrderListProps) {
                         <div className="space-y-2">
                           <div className="grid grid-cols-3 gap-2 text-sm">
                             <span className="text-muted-foreground">이름</span>
-                            <span className="col-span-2 font-medium">{order.user.name || "-"}</span>
+                            <span className="col-span-2 font-medium">
+                              {order.user.name || "-"}
+                            </span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 text-sm">
-                            <span className="text-muted-foreground">이메일</span>
-                            <span className="col-span-2 font-medium">{order.user.email || "-"}</span>
+                            <span className="text-muted-foreground">
+                              이메일
+                            </span>
+                            <span className="col-span-2 font-medium">
+                              {order.user.email || "-"}
+                            </span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 text-sm">
-                            <span className="text-muted-foreground">전화번호</span>
-                            <span className="col-span-2 font-medium">{order.user.phone || "-"}</span>
+                            <span className="text-muted-foreground">
+                              전화번호
+                            </span>
+                            <span className="col-span-2 font-medium">
+                              {order.user.phone || "-"}
+                            </span>
                           </div>
                         </div>
                       </PopoverContent>

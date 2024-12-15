@@ -67,6 +67,8 @@ model Order {
   couponApplied Coupon? @relation(fields: [couponAppliedId], references: [id])
   couponAppliedId Int?
 
+  deliveryAddress DeliveryAddress?
+
   isCanceled Boolean @default(false)
   isRefunded Boolean @default(false)
 
@@ -74,6 +76,21 @@ model Order {
   updatedAt DateTime @updatedAt
 
   @@index([userId, id])
+}
+
+model DeliveryAddress {
+  id String @id @default(uuid())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String @unique
+
+  name String
+  phone String
+  address String
+  detailedAddress String
+  zipcode String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Product {
