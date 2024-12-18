@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
+import { ko } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -19,10 +19,14 @@ export function DatePickerWithRange() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  
+
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: searchParams?.get("startDate") ? new Date(searchParams.get("startDate")!) : undefined,
-    to: searchParams?.get("endDate") ? new Date(searchParams.get("endDate")!) : undefined,
+    from: searchParams?.get("startDate")
+      ? new Date(searchParams.get("startDate")!)
+      : undefined,
+    to: searchParams?.get("endDate")
+      ? new Date(searchParams.get("endDate")!)
+      : undefined,
   });
 
   const createQueryString = React.useCallback(
@@ -73,6 +77,7 @@ export function DatePickerWithRange() {
           <Calendar
             initialFocus
             mode="range"
+            locale={ko}
             defaultMonth={date?.from}
             selected={date}
             onSelect={(selectedDate) => {
@@ -103,4 +108,4 @@ export function DatePickerWithRange() {
       </Popover>
     </div>
   );
-} 
+}

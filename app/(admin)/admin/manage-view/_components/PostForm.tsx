@@ -5,7 +5,7 @@ import { Post, BusCategory } from "@prisma/client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Form, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Form,
   FormItem,
   FormLabel,
   FormControl,
@@ -273,7 +274,7 @@ export default function PostForm({
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="space-y-8">
           <FormField
             control={form.control}
             name="title"
@@ -450,11 +451,11 @@ export default function PostForm({
             >
               취소
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button onClick={form.handleSubmit(onSubmit)} disabled={isLoading}>
               {isLoading ? "저장 중..." : "저장"}
             </Button>
           </div>
-        </form>
+        </div>
       </Form>
     </div>
   );

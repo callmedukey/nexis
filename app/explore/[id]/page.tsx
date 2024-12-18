@@ -52,7 +52,7 @@ export default async function PostPage({ params }: Props) {
                       src={image.url}
                       alt={post.title}
                       fill
-                      className="object-cover"
+                      className="object-fill"
                     />
                   </div>
                 </CarouselItem>
