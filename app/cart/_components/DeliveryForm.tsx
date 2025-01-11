@@ -22,6 +22,7 @@ const deliveryFormSchema = z.object({
   address: z.string().min(1, "주소를 입력해주세요"),
   detailedAddress: z.string().min(1, "상세주소를 입력해주세요"),
   zipcode: z.string().min(1, "우편번호를 입력해주세요"),
+  setAsDefault: z.boolean().default(false),
 });
 
 interface DeliveryFormProps {
@@ -32,10 +33,25 @@ interface DeliveryFormProps {
     detailedAddress?: string | null;
     zipcode?: string | null;
   };
-  onSubmit: (data: z.infer<typeof deliveryFormSchema>) => void;
+  couponDiscount?: number;
+  onSubmit: (data: {
+    deliveryInfo: {
+      name: string;
+      phone: string;
+      address: string;
+      detailedAddress: string;
+      zipcode: string;
+      setAsDefault: boolean;
+    };
+    couponDiscount: number;
+  }) => void;
 }
 
-export function DeliveryForm({ defaultValues, onSubmit }: DeliveryFormProps) {
+export function DeliveryForm({
+  defaultValues,
+  couponDiscount = 0,
+  onSubmit,
+}: DeliveryFormProps) {
   const form = useForm<z.infer<typeof deliveryFormSchema>>({
     resolver: zodResolver(deliveryFormSchema),
     defaultValues: {
@@ -44,8 +60,23 @@ export function DeliveryForm({ defaultValues, onSubmit }: DeliveryFormProps) {
       address: defaultValues?.address || "",
       detailedAddress: defaultValues?.detailedAddress || "",
       zipcode: defaultValues?.zipcode || "",
+      setAsDefault: false,
     },
   });
+
+  const handleSubmit = (data: z.infer<typeof deliveryFormSchema>) => {
+    onSubmit({
+      deliveryInfo: {
+        name: data.name,
+        phone: data.phone,
+        address: data.address,
+        detailedAddress: data.detailedAddress,
+        zipcode: data.zipcode,
+        setAsDefault: data.setAsDefault,
+      },
+      couponDiscount: couponDiscount,
+    });
+  };
 
   return (
     <Card>
@@ -54,7 +85,10 @@ export function DeliveryForm({ defaultValues, onSubmit }: DeliveryFormProps) {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="name"
@@ -105,6 +139,25 @@ export function DeliveryForm({ defaultValues, onSubmit }: DeliveryFormProps) {
                     <Input placeholder="상세주소를 입력해주세요" {...field} />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="setAsDefault"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                  <FormControl>
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={field.onChange}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                  </FormControl>
+                  <FormLabel className="font-normal">
+                    기본 배송지로 설정
+                  </FormLabel>
                 </FormItem>
               )}
             />

@@ -15,6 +15,7 @@ const submitOrderSchema = z.object({
     address: z.string(),
     detailedAddress: z.string(),
     zipcode: z.string(),
+    setAsDefault: z.boolean(),
   }),
 });
 
@@ -73,6 +74,7 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
     });
 
     let sequenceNumber = "0001";
+
     if (lastOrder) {
       const lastSequence = parseInt(lastOrder.id.slice(-4));
       sequenceNumber = String(lastSequence + 1).padStart(4, "0");
@@ -110,6 +112,19 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
         });
       }
 
+      if (data.deliveryInfo.setAsDefault) {
+        await tx.user.update({
+          where: { providerId: session.user.id },
+          data: {
+            name: data.deliveryInfo.name,
+            phone: data.deliveryInfo.phone,
+            address: data.deliveryInfo.address,
+            detailedAddress: data.deliveryInfo.detailedAddress,
+            zipcode: data.deliveryInfo.zipcode,
+          },
+        });
+      }
+
       // Create the order
       return await tx.order.create({
         data: {
@@ -120,6 +135,15 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
             },
           },
           status: PurchaseStatus.PENDING,
+          deliveryAddress: {
+            create: {
+              name: data.deliveryInfo.name,
+              phone: data.deliveryInfo.phone,
+              address: data.deliveryInfo.address,
+              detailedAddress: data.deliveryInfo.detailedAddress,
+              zipcode: data.deliveryInfo.zipcode,
+            },
+          },
           price: finalTotal,
           discount: couponDiscount,
           products: {

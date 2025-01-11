@@ -37,6 +37,8 @@ model User {
   name      String?
   email     String?
   phone     String?
+  deliveryName   String?
+  deliveryPhone   String?
   address   String?
   detailedAddress   String?
   zipcode   String?

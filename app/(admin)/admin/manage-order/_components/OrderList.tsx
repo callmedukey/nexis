@@ -206,7 +206,7 @@ export async function OrderList({ searchParams }: OrderListProps) {
                         </span>
                         <ChevronDown className="size-4" />
                       </PopoverTrigger>
-                      <PopoverContent className="w-60">
+                      <PopoverContent className="min-w-60">
                         <div className="space-y-2">
                           <div className="grid grid-cols-3 gap-2 text-sm">
                             <span className="text-muted-foreground">이름</span>

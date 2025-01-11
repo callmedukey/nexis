@@ -40,15 +40,15 @@ const page = async ({
         <div className="grid grid-cols-[auto_1fr] gap-4 ~text-xs/lg">
           <div className=" font-light text-icongray">고객명</div>
           <div className="font-normal text-primaryblack">
-            {user?.name ?? "홍길동"}
+            {user?.name ?? ""}
           </div>
           <div className=" font-light text-icongray">이메일</div>
           <div className="font-normal text-primaryblack">
-            {user?.email ?? "test@test.com"}
+            {user?.email ?? ""}
           </div>
           <div className=" font-light text-icongray">연락처</div>
           <div className="font-normal text-primaryblack">
-            {user?.phone ?? "010-1234-5678"}
+            {user?.phone ?? ""}
           </div>
           <ProfileEditDrawer
             isRedirected={isRedirected}
@@ -65,15 +65,15 @@ const page = async ({
         <div className="grid grid-cols-[auto_1fr] gap-4 ~text-xs/lg">
           <div className=" font-light text-icongray">주소</div>
           <div className="font-normal text-primaryblack">
-            {user?.address ?? "서울특별시 강남구 테헤란로 123"}
+            {user?.address ?? ""}
           </div>
           <div className=" font-light text-icongray">상세 주소</div>
           <div className="font-normal text-primaryblack">
-            {user?.detailedAddress ?? "123-123"}
+            {user?.detailedAddress ?? ""}
           </div>
           <div className=" font-light text-icongray">우편번호</div>
           <div className="font-normal text-primaryblack">
-            {user?.zipcode ?? "123-123"}
+            {user?.zipcode ?? ""}
           </div>
           <AddressUpdateDrawer
             initialData={{

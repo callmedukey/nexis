@@ -44,11 +44,20 @@ export function OrderSummary({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const handleDeliverySubmit = async (data: any) => {
+  const handleDeliverySubmit = async (data: {
+    deliveryInfo: {
+      name: string;
+      phone: string;
+      address: string;
+      detailedAddress: string;
+      zipcode: string;
+      setAsDefault: boolean;
+    };
+  }) => {
     startTransition(async () => {
       const result = await submitOrder({
         couponDiscount,
-        deliveryInfo: data,
+        deliveryInfo: data.deliveryInfo,
       });
 
       if (result.error) {
@@ -104,6 +113,7 @@ export function OrderSummary({
       {showDeliveryForm && (
         <DeliveryForm
           defaultValues={userData}
+          couponDiscount={couponDiscount}
           onSubmit={handleDeliverySubmit}
         />
       )}

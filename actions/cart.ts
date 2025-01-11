@@ -64,7 +64,7 @@ export async function addToCart(
     const product = await prisma.product.findUnique({
       where: { id: productId },
     });
-r
+
     if (!product) {
       return {
         success: false,
@@ -80,7 +80,10 @@ r
       };
     }
 
-    if (optionIndex !== undefined && (optionIndex < 0 || optionIndex >= product.options.length)) {
+    if (
+      optionIndex !== undefined &&
+      (optionIndex < 0 || optionIndex >= product.options.length)
+    ) {
       return {
         success: false,
         message: "잘못된 상품 옵션입니다",
@@ -102,7 +105,8 @@ r
       where: {
         cartId: cart.id,
         productId,
-        selectedOption: optionIndex !== undefined ? product.options[optionIndex] : null,
+        selectedOption:
+          optionIndex !== undefined ? product.options[optionIndex] : null,
       },
     });
 
@@ -119,7 +123,8 @@ r
           cartId: cart.id,
           productId,
           quantity,
-          selectedOption: optionIndex !== undefined ? product.options[optionIndex] : null,
+          selectedOption:
+            optionIndex !== undefined ? product.options[optionIndex] : null,
         },
       });
     }
@@ -246,7 +251,9 @@ export async function removeCartItem(
   }
 }
 
-export async function validateCoupon(code: string): Promise<ServerResponse<{ flatDiscount?: number; discountRate?: number }>> {
+export async function validateCoupon(
+  code: string
+): Promise<ServerResponse<{ flatDiscount?: number; discountRate?: number }>> {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -257,7 +264,7 @@ export async function validateCoupon(code: string): Promise<ServerResponse<{ fla
     }
 
     const coupon = await prisma.coupon.findUnique({
-      where: { 
+      where: {
         code,
         active: true,
       },

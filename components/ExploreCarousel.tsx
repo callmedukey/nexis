@@ -50,7 +50,7 @@ export function ExploreCarousel({ items }: ExploreCarouselProps) {
   if (items.length === 0) {
     return (
       <div className="flex min-h-[200px] items-center justify-center text-muted-foreground">
-        등록된 ���보기가가 없습니다
+        등록된 둘러보기가 없습니다
       </div>
     );
   }
