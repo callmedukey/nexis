@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import Header from "@/components/layout/Header";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { Toaster } from "@/components/ui/sonner";
+import Footer from "../components/layout/Footer";
 
 const notoSans = NotoSans({
   variable: "--font-noto",
@@ -34,9 +35,10 @@ export default async function RootLayout({
         >
           <Header />
           <div className="py-4">
-            <SearchBar />
           </div>
+            <SearchBar />
           {children}
+          <Footer />
           <Toaster position="top-center" />
         </body>
       </SessionProvider>
