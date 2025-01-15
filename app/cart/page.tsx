@@ -48,16 +48,18 @@ export default async function CartPage() {
 
   const totalDiscount = originalTotal - discountedTotal;
 
-  const userData = cart?.user ? {
-    name: cart.user.name,
-    phone: cart.user.phone,
-    address: cart.user.address,
-    detailedAddress: cart.user.detailedAddress,
-    zipcode: cart.user.zipcode,
-  } : undefined;
+  const userData = cart?.user
+    ? {
+        name: cart.user.name,
+        phone: cart.user.phone,
+        address: cart.user.address,
+        detailedAddress: cart.user.detailedAddress,
+        zipcode: cart.user.zipcode,
+      }
+    : undefined;
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 min-h-screen">
       {items.length === 0 ? (
         <Card>
           <CardContent className="flex min-h-[300px] items-center justify-center">

@@ -217,6 +217,24 @@ export default function EditProductForm({ initialCategories }: Props) {
                 추천 제품
               </label>
             </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="specialDelivery"
+                checked={context.specialDelivery}
+                onCheckedChange={(checked) =>
+                  setContext((prev) => ({
+                    ...prev,
+                    specialDelivery: checked === true,
+                  }))
+                }
+              />
+              <label
+                htmlFor="specialDelivery"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                화물배송
+              </label>
+            </div>
           </div>
         </div>
       </div>

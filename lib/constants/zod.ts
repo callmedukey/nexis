@@ -30,7 +30,7 @@ export const productSchema = z.object({
           "지원되는 이미지 형식: SVG, PNG, JPG, JPEG, GIF, WebP, AVIF"
         )
     )
-    .min(1, "메인 이미지를 한 개 이상 업로���해주세요"),
+    .min(1, "메인 이미지를 한 개 이상 업로드해주세요"),
   productImages: z
     .array(
       z
@@ -43,6 +43,7 @@ export const productSchema = z.object({
     .min(1, "상세 이미지를 한 개 이상 업로드해주세요"),
   options: z.array(z.string()),
   delivery: z.boolean().default(false),
+  specialDelivery: z.boolean().default(false),
   status: z.nativeEnum(ProductStatus).optional(),
   isNew: z.boolean().default(true),
   isRecommended: z.boolean().default(false),

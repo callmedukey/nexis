@@ -1,8 +1,26 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import { randomUUID } from "crypto";
 const prisma = new PrismaClient();
 
 async function main() {
   try {
+    await prisma.user.upsert({
+      where: { email: "test@nexis.com" },
+      update: {
+        email: "test@nexis.com",
+        password: await bcrypt.hash("test2025@@", 10),
+        provider: "credentials",
+        providerId: randomUUID(),
+      },
+      create: {
+        email: "test@nexis.com",
+        password: await bcrypt.hash("test2025@@", 10),
+        provider: "credentials",
+        providerId: randomUUID(),
+      },
+    });
+
     const foundAdmin = await prisma.user.findFirst({
       where: {
         isAdmin: true,

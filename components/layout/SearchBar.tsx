@@ -64,7 +64,9 @@ export function SearchBar() {
     pathname.startsWith("/admin") ||
     pathname.startsWith("/products/") ||
     pathname.startsWith("/account") ||
-    pathname.startsWith("/explore")
+    pathname.startsWith("/explore") ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/signup")
   ) {
     return null;
   }

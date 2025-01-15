@@ -57,7 +57,13 @@ const AccountMenu = () => {
               if (link.url === ROUTES.LOGIN) {
                 return (
                   <DropdownMenuItem key={link.label} asChild>
-                    <LoginMenu key={link.label} />
+                    <Link
+                      href={link.url}
+                      className="cursor-pointer w-full px-2 py-1.5 text-left !text-lg leading-none focus:outline-none"
+                    >
+                      로그인
+                    </Link>
+                    {/* <LoginMenu key={link.label} /> */}
                   </DropdownMenuItem>
                 );
               }

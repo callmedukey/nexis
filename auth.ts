@@ -1,6 +1,8 @@
 import NextAuth, { DefaultSession } from "next-auth";
 import kakao from "next-auth/providers/kakao";
 import naver from "next-auth/providers/naver";
+import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 
 import prisma from "@/lib/prisma";
 
@@ -38,7 +40,51 @@ declare module "next-auth" {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: [kakao, naver],
+  providers: [
+    kakao,
+    naver,
+    Credentials({
+      credentials: {
+        email: { type: "email", label: "Email" },
+        password: { type: "password", label: "Password" },
+      },
+      authorize: async (credentials, request) => {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
+        const user = await prisma.user.findUnique({
+          where: {
+            email: credentials.email as string,
+          },
+        });
+
+        if (!user?.password) {
+          return null;
+        }
+
+        const isValid = await bcrypt.compare(
+          credentials.password as string,
+          user.password
+        );
+
+        if (!isValid) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          isAdmin: user.isAdmin,
+        };
+      },
+    }),
+  ],
+  pages: {
+    signIn: "/login",
+    error: "/login",
+  },
   callbacks: {
     jwt({ token, account, profile, user }) {
       if (account?.provider === "naver" || account?.provider === "kakao") {
@@ -50,6 +96,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.email = profile?.response?.email as string;
           token.phone = profile?.response?.mobile as string;
         }
+      } else if (account?.provider === "credentials") {
+        token.userId = user.id;
+        token.provider = "credentials";
+        token.email = user.email;
+        token.isAdmin = user.isAdmin || false;
       }
       return token;
     },
@@ -63,7 +114,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async signIn({ account, user, profile }) {
-      // this happens first upon sign in
+      if (account?.provider === "credentials") {
+        return true; // Allow credential login
+      }
+
       if (account?.provider === "naver" || account?.provider === "kakao") {
         const userId = account?.providerAccountId as string;
 

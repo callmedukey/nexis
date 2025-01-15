@@ -17,6 +17,7 @@ export interface ProductFormState {
   price: number;
   options: string[];
   delivery: boolean;
+  specialDelivery: boolean;
   discountRate: number;
   categories: CategorySelection[];
   stock: number;
@@ -27,7 +28,10 @@ export interface ProductFormState {
   isRecommended: boolean;
 }
 
-type ContextType = [ProductFormState, Dispatch<SetStateAction<ProductFormState>>];
+type ContextType = [
+  ProductFormState,
+  Dispatch<SetStateAction<ProductFormState>>
+];
 
 export const Context = createContext<ContextType>([
   {
@@ -38,6 +42,7 @@ export const Context = createContext<ContextType>([
     status: ProductStatus.ACTIVE,
     stock: 0,
     delivery: false,
+    specialDelivery: false,
     options: [],
     categories: [],
     productMainImages: [],
@@ -66,6 +71,7 @@ export default function ContextProvider({
       status: ProductStatus.ACTIVE,
       stock: 0,
       delivery: false,
+      specialDelivery: false,
       options: [],
       categories: [],
       productMainImages: [],

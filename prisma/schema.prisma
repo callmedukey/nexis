@@ -35,7 +35,8 @@ model User {
   orders Order[]
 
   name      String?
-  email     String?
+  email     String? @unique
+  password  String?
   phone     String?
   deliveryName   String?
   deliveryPhone   String?
@@ -118,6 +119,8 @@ model Product {
   productMainImages ProductMainImage[]
   productImages     ProductImage[]
   options           String[]
+
+  specialDelivery Boolean @default(false)
 
   delivery Boolean @default(false)
 

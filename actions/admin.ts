@@ -358,6 +358,7 @@ export async function createProduct(
         },
         isNew: data.isNew,
         isRecommended: data.isRecommended,
+        specialDelivery: data.specialDelivery,
         stock: data.stock,
         options: data.options,
         delivery: data.delivery,
@@ -407,6 +408,7 @@ interface UpdateProductData {
   price: number;
   options: string[];
   delivery: boolean;
+  specialDelivery: boolean;
   discountRate: number;
   category: string[];
   subCategory: string[];
@@ -462,6 +464,7 @@ export async function updateProduct(
         stock: data.stock,
         options: data.options,
         delivery: data.delivery,
+        specialDelivery: data.specialDelivery,
         status: data.status,
         isNew: data.isNew,
         isRecommended: data.isRecommended,
@@ -881,7 +884,9 @@ export async function createPost(
             }
           : undefined,
         busCategory: {
-          connect: result.data.busCategoryIds.map((id) => ({ id: parseInt(id) })),
+          connect: result.data.busCategoryIds.map((id) => ({
+            id: parseInt(id),
+          })),
         },
       },
       include: {
@@ -969,7 +974,7 @@ export async function updatePost(
     console.error("Post update failed:", error);
     return {
       success: false,
-      message: "게���물 수정에 실패했습니다.",
+      message: "게시물 수정에 실패했습니다.",
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }
@@ -1395,7 +1400,7 @@ export async function updateEvent(
     revalidatePath("/admin/manage-events");
     return {
       success: true,
-      message: "이벤트��� 수정되었습니다.",
+      message: "이벤트가 수정되었습니다.",
       data: event,
     };
   } catch (error) {
@@ -1656,11 +1661,11 @@ export async function getCoupons() {
 }
 
 export async function updateCoupon(data: {
-  id: number
-  code: string
-  active: boolean
-  flatDiscount: number | null
-  discountRate: number | null
+  id: number;
+  code: string;
+  active: boolean;
+  flatDiscount: number | null;
+  discountRate: number | null;
 }): Promise<ServerResponse> {
   try {
     const session = await auth();
