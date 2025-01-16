@@ -17,7 +17,7 @@ type ServerResponse<T> = {
   success: boolean;
 };
 
-export const revalidate: Revalidate = 60 * 10;
+export const revalidate = 600;
 
 interface CategoryThumbnail {
   id: number;
