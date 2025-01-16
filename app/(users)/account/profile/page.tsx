@@ -10,7 +10,7 @@ import ProfileEditDrawer from "./_components/ProfileEditDrawer";
 const page = async ({
   searchParams,
 }: {
-  searchParams: { redirect: string };
+  searchParams: Promise<{ redirect: string }>;
 }) => {
   const awaitedSearchParams = await searchParams;
   const isRedirected = awaitedSearchParams.redirect === "true";

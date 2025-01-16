@@ -6,9 +6,9 @@ import prisma from "@/lib/prisma";
 import PostForm from "../_components/PostForm";
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function Page({ params }: Props) {
@@ -32,7 +32,7 @@ export default async function Page({ params }: Props) {
       <main className="min-h-screen bg-lightgray">
         <div className="p-8">
           <div className="rounded-lg bg-white p-4 md:p-8">
-            <PostForm busCategories={busCategories} />
+            <PostForm busCategories={busCategories} onSuccess={() => {}} />
           </div>
         </div>
       </main>
@@ -57,7 +57,11 @@ export default async function Page({ params }: Props) {
     <main className="min-h-screen bg-lightgray">
       <div className="p-8">
         <div className="rounded-lg bg-white p-4 md:p-8">
-          <PostForm initialData={post} busCategories={busCategories} />
+          <PostForm
+            initialData={post}
+            busCategories={busCategories}
+            onSuccess={() => {}}
+          />
         </div>
       </div>
     </main>

@@ -9,12 +9,12 @@ import { UserList } from "./_components/UserList";
 import { UserListSkeleton } from "./_components/UserListSkeleton";
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     email?: string;
     phone?: string;
     name?: string;
-  };
+  }>;
 }
 
 export default async function ManageUserPage({ searchParams }: PageProps) {

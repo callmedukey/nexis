@@ -25,4 +25,4 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
       </DialogContent>
     </Dialog>
   );
-} 
+}

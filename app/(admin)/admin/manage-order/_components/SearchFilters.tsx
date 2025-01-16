@@ -23,6 +23,8 @@ const STATUS_MAP: Record<PurchaseStatus, string> = {
   DELIVERING: "배송중",
   COMPLETED: "배송완료",
   CANCELLED: "주문취소",
+  CANCELLING: "취소중",
+  RETURNING: "반품중",
 };
 
 export function SearchFilters() {

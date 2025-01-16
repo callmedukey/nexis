@@ -3,7 +3,12 @@
 import { unlink } from "fs/promises";
 import path, { join } from "path";
 
-import { BusCategory, ProductStatus } from "@prisma/client";
+import {
+  BusCategory,
+  Coupon,
+  ProductStatus,
+  PurchaseStatus,
+} from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -516,7 +521,7 @@ export async function updateProduct(
 }
 
 export async function deleteProducts(
-  formData: FormData
+  input: FormData | number[]
 ): Promise<ServerResponse> {
   try {
     const session = await auth();
@@ -527,28 +532,33 @@ export async function deleteProducts(
       };
     }
 
-    const idsString = formData.get("ids");
-    if (!idsString || typeof idsString !== "string") {
-      return {
-        success: false,
-        message: "상품 ID가 올바르지 않습니다.",
-      };
-    }
-
     let ids: number[];
-    try {
-      ids = JSON.parse(idsString);
-      if (!Array.isArray(ids) || !ids.every((id) => typeof id === "number")) {
+
+    if (input instanceof FormData) {
+      const idsString = input.get("ids");
+      if (!idsString || typeof idsString !== "string") {
+        return {
+          success: false,
+          message: "상품 ID가 올바르지 않습니다.",
+        };
+      }
+
+      try {
+        ids = JSON.parse(idsString);
+        if (!Array.isArray(ids) || !ids.every((id) => typeof id === "number")) {
+          return {
+            success: false,
+            message: "상품 ID 형식이 올바르지 않습니다.",
+          };
+        }
+      } catch {
         return {
           success: false,
           message: "상품 ID 형식이 올바르지 않습니다.",
         };
       }
-    } catch {
-      return {
-        success: false,
-        message: "상품 ID 형식이 올바르지 않습니다.",
-      };
+    } else {
+      ids = input;
     }
 
     // First, get all images associated with these products
@@ -614,9 +624,7 @@ export async function deleteProducts(
   }
 }
 
-export async function deleteProduct(
-  formData: FormData
-): Promise<ServerResponse> {
+export async function deleteProduct(id: number): Promise<ServerResponse> {
   try {
     const session = await auth();
     if (!session?.user.isAdmin) {
@@ -626,7 +634,6 @@ export async function deleteProduct(
       };
     }
 
-    const id = Number(formData.get("id"));
     if (isNaN(id)) {
       return {
         success: false,
@@ -1577,7 +1584,7 @@ export async function createCoupon(data: {
   active: boolean;
   flatDiscount: number | null;
   discountRate: number | null;
-}): Promise<ServerResponse> {
+}): Promise<ServerResponse<Coupon>> {
   try {
     const session = await auth();
     if (!session?.user.isAdmin) {
@@ -1666,7 +1673,7 @@ export async function updateCoupon(data: {
   active: boolean;
   flatDiscount: number | null;
   discountRate: number | null;
-}): Promise<ServerResponse> {
+}): Promise<ServerResponse<Coupon>> {
   try {
     const session = await auth();
     if (!session?.user.isAdmin) {

@@ -21,7 +21,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
         <DialogHeader>
           <DialogTitle className="sr-only">게시물 작성</DialogTitle>
         </DialogHeader>
-        <PostForm onSuccess={onClose} />
+        <PostForm onSuccess={onClose} busCategories={[]} />
       </DialogContent>
     </Dialog>
   );

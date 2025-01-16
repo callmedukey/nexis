@@ -48,7 +48,7 @@ const searchParamsSchema = z.object({
 export default async function Page({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await auth();
   if (!session?.user.isAdmin) {
@@ -148,7 +148,8 @@ export default async function Page({
   const statusCounts = {
     total: allProducts.length,
     active: allProducts.filter((p) => p.status === ProductStatus.ACTIVE).length,
-    soldout: allProducts.filter((p) => p.status === ProductStatus.SOLDOUT).length,
+    soldout: allProducts.filter((p) => p.status === ProductStatus.SOLDOUT)
+      .length,
     inactive: allProducts.filter((p) => p.status === ProductStatus.INACTIVE)
       .length,
   };
@@ -161,7 +162,7 @@ export default async function Page({
   });
 
   const createQueryString = (newPage: number) => {
-  const params = new URLSearchParams();
+    const params = new URLSearchParams();
     if (parsedCategoryId) params.set("categoryId", parsedCategoryId.toString());
     if (parsedSubCategoryId)
       params.set("subCategoryId", parsedSubCategoryId.toString());

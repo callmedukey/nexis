@@ -6,9 +6,9 @@ import prisma from "@/lib/prisma";
 import { EventForm } from "../_components/EventForm";
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function Page({ params }: Props) {
@@ -17,9 +17,7 @@ export default async function Page({ params }: Props) {
     redirect("/");
   }
 
-  // Await the route parameter
-  const awaitedParams = await params;
-  const { id } = awaitedParams;
+  const { id } = await params;
 
   // Handle the "new" route
   if (id === "new") {

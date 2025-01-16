@@ -20,11 +20,7 @@ import { CancelOrderButton } from "./_components/CancelOrderButton";
 import { DateRangePicker } from "./_components/DateRangePicker";
 
 interface PageProps {
-  searchParams: {
-    page?: string;
-    from?: string;
-    to?: string;
-  };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function HistoryPage({ searchParams }: PageProps) {
@@ -43,12 +39,20 @@ export default async function HistoryPage({ searchParams }: PageProps) {
     },
     ...(awaitedSearchParams.from && {
       createdAt: {
-        gte: new Date(awaitedSearchParams.from),
+        gte: new Date(
+          Array.isArray(awaitedSearchParams.from)
+            ? awaitedSearchParams.from[0]
+            : awaitedSearchParams.from
+        ),
       },
     }),
     ...(awaitedSearchParams.to && {
       createdAt: {
-        lte: new Date(awaitedSearchParams.to),
+        lte: new Date(
+          Array.isArray(awaitedSearchParams.to)
+            ? awaitedSearchParams.to[0]
+            : awaitedSearchParams.to
+        ),
       },
     }),
   };

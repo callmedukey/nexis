@@ -37,6 +37,7 @@ interface PostFormProps {
     busCategory: BusCategory[];
   };
   busCategories: BusCategory[];
+  onSuccess: () => void;
 }
 
 const formSchema = z.object({
@@ -144,6 +145,7 @@ function FileInputWrapper() {
 export default function PostForm({
   initialData,
   busCategories,
+  onSuccess,
 }: PostFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);

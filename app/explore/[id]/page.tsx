@@ -11,9 +11,9 @@ import prisma from "@/lib/prisma";
 import { ShareButton } from "./_components/ShareButton";
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function PostPage({ params }: Props) {

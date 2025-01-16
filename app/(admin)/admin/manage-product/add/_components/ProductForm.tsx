@@ -76,9 +76,13 @@ export default function ProductForm({ initialCategories }: ProductFormProps) {
         price: context.price,
         options: context.options,
         delivery: context.delivery,
+        specialDelivery: context.specialDelivery ?? false,
         discountRate: context.discountRate,
-        categories: context.categories,
+        category: context.categories.map((cat: any) => cat.categoryId),
+        subCategory: [],
         stock: context.stock ?? 0,
+        isNew: true,
+        isRecommended: false,
       });
 
       if (!result.success) {
@@ -146,7 +150,7 @@ export default function ProductForm({ initialCategories }: ProductFormProps) {
 
         <section>
           <h2 className="mb-4 text-xl font-bold">상품 카테고리</h2>
-          <CategorySelector initialCategories={initialCategories} />
+          <CategorySelector categories={initialCategories} />
         </section>
 
         <div className="h-0.5 bg-gray-300" />
@@ -191,4 +195,4 @@ export default function ProductForm({ initialCategories }: ProductFormProps) {
       </main>
     </div>
   );
-} 
+}

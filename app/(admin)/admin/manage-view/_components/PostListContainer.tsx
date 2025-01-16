@@ -19,9 +19,12 @@ export function PostListContainer({ posts, query }: PostListContainerProps) {
   return (
     <>
       <div className="mb-4">
-        <SearchInput placeholder="제목으로 검색" defaultValue={query} />
+        <SearchInput defaultValue={query} />
       </div>
-      <PostList posts={posts} onSelectionChange={(ids) => setHasSelection(ids.length > 0)} />
+      <PostList
+        posts={posts}
+        onSelectionChange={(ids) => setHasSelection(ids.length > 0)}
+      />
       <div className="fixed bottom-0 left-0 right-0 z-10 border-t bg-white p-4">
         <div className="flex items-center justify-between">
           <Button asChild size="sm">
@@ -42,4 +45,4 @@ export function PostListContainer({ posts, query }: PostListContainerProps) {
       </div>
     </>
   );
-} 
+}

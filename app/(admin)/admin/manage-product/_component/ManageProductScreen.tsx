@@ -1,6 +1,6 @@
 "use client";
 
-import { ProductStatus, type Product } from "@prisma/client";
+import { Category, ProductStatus, type Product } from "@prisma/client";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -10,7 +10,11 @@ import { cn } from "@/lib/utils";
 
 import ManageProductScreenTab from "./ManageProductScreenTab";
 
-const ManageProductScreen = ({ products }: { products: Product[] }) => {
+const ManageProductScreen = ({
+  products,
+}: {
+  products: (Product & { category: Category[] })[];
+}) => {
   const { ACTIVE, INACTIVE, SOLDOUT } = useMemo(() => {
     return {
       ACTIVE: products.filter(

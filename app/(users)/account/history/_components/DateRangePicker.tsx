@@ -1,6 +1,6 @@
 "use client";
 
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -19,18 +19,20 @@ export function DateRangePicker() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  
+
   const [date, setDate] = React.useState<{
     from?: Date;
     to?: Date;
   }>({
-    from: searchParams.get("from") ? new Date(searchParams.get("from")!) : undefined,
+    from: searchParams.get("from")
+      ? new Date(searchParams.get("from")!)
+      : undefined,
     to: searchParams.get("to") ? new Date(searchParams.get("to")!) : undefined,
   });
 
   const handleSelect = (value: { from?: Date; to?: Date }) => {
     setDate(value);
-    
+
     const params = new URLSearchParams(searchParams);
     if (value.from) {
       params.set("from", value.from.toISOString());
@@ -43,7 +45,7 @@ export function DateRangePicker() {
       params.delete("to");
     }
     params.delete("page");
-    
+
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -78,8 +80,11 @@ export function DateRangePicker() {
             initialFocus
             mode="range"
             defaultMonth={date?.from}
-            selected={date}
-            onSelect={handleSelect}
+            selected={{
+              from: date?.from || undefined,
+              to: date?.to || undefined,
+            }}
+            onSelect={(range) => handleSelect(range || {})}
             numberOfMonths={2}
             locale={ko}
           />
@@ -87,4 +92,4 @@ export function DateRangePicker() {
       </Popover>
     </div>
   );
-} 
+}

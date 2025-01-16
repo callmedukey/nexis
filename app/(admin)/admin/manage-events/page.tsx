@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 import { EventsPageClient } from "./_components/EventsPageClient";
 
 interface Props {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function EventsPage({ searchParams }: Props) {

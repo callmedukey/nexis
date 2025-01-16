@@ -97,7 +97,7 @@ async function getProducts(searchParams: SearchParams) {
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
   const awaitedSearchParams = await searchParams;
   const [categories, { products, total, pages }] = await Promise.all([

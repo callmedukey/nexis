@@ -11,9 +11,9 @@ import prisma from "@/lib/prisma";
 import { ShareButton } from "@/app/explore/[id]/_components/ShareButton";
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EventPage({ params }: Props) {
@@ -80,4 +80,4 @@ export default async function EventPage({ params }: Props) {
       </div>
     </main>
   );
-} 
+}

@@ -7,7 +7,11 @@ import { useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/lib/hooks/use-debounce";
 
-export function SearchInput() {
+interface SearchInputProps {
+  defaultValue?: string;
+}
+
+export function SearchInput({ defaultValue }: SearchInputProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -31,7 +35,7 @@ export function SearchInput() {
       <Search className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
       <Input
         placeholder="제목 또는 내용으로 검색"
-        defaultValue={searchParams.get("query") ?? ""}
+        defaultValue={defaultValue ?? searchParams.get("query") ?? ""}
         onChange={(e) => createQueryString(e.target.value)}
         className="pl-8"
       />

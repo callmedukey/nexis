@@ -1,10 +1,10 @@
 "use client";
-import type { Product } from "@prisma/client";
+import type { Category, Product } from "@prisma/client";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { deleteProduct } from "@/actions/admin";
+import { deleteProducts } from "@/actions/admin";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
@@ -16,7 +16,11 @@ import {
 } from "@/components/ui/table";
 import { generateProductId } from "@/lib/generateProductId";
 
-const ManageProductScreenTab = ({ products }: { products: Product[] }) => {
+const ManageProductScreenTab = ({
+  products,
+}: {
+  products: (Product & { category: Category[] })[];
+}) => {
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
 
   const handleDelete = async (
@@ -24,7 +28,7 @@ const ManageProductScreenTab = ({ products }: { products: Product[] }) => {
     productIds?: number[]
   ) => {
     if (type === "all") {
-      const response = await deleteProduct(
+      const response = await deleteProducts(
         productIds ?? products.map((product) => product.id)
       );
 
@@ -36,7 +40,7 @@ const ManageProductScreenTab = ({ products }: { products: Product[] }) => {
     }
 
     if (type === "selected" && productIds) {
-      const response = await deleteProduct(productIds);
+      const response = await deleteProducts(productIds);
 
       if (response?.success) {
         toast.success("상품을 삭제하였습니다.");
@@ -90,7 +94,7 @@ const ManageProductScreenTab = ({ products }: { products: Product[] }) => {
               <TableCell>{index + 1}</TableCell>
               <TableCell>{product.name}</TableCell>
               <TableCell>{product.price}</TableCell>
-              <TableCell>{product?.category ?? "-"}</TableCell>
+              <TableCell>{product.category[0]?.name ?? "-"}</TableCell>
               <TableCell>{product.discount}</TableCell>
               <TableCell>{product.status}</TableCell>
               <TableCell>{product.stock}</TableCell>

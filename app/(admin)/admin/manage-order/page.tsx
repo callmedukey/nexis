@@ -11,12 +11,12 @@ import { OrderListSkeleton } from "./_components/OrderListSkeleton";
 import { StatusTabs } from "./_components/StatusTabs";
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     status?: string;
     startDate?: string;
     endDate?: string;
-  };
+  }>;
 }
 
 export default async function ManageOrderPage({ searchParams }: PageProps) {

@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Events, EventsThumbnail } from "@prisma/client";
 
 const formSchema = z.object({
   title: z.string().min(1, "제목을 입력해주세요"),
@@ -39,7 +40,10 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface EventFormProps {
-  initialData?: any;
+  initialData?: Events & {
+    thumbnail: EventsThumbnail[];
+  };
+  onSuccess?: () => void;
 }
 
 function FileSvgDraw() {
@@ -146,18 +150,18 @@ function ImageItem({ url, onDelete, isNew, index }: ImageItemProps) {
   );
 }
 
-export function EventForm({ initialData }: EventFormProps) {
+export function EventForm({ initialData, onSuccess }: EventFormProps) {
   const router = useRouter();
   const [files, setFiles] = useState<File[] | null>(null);
   const [existingImages, setExistingImages] = useState<
     Array<{ id: number; url: string }>
   >(initialData?.thumbnail || []);
 
-  const form = useForm<FormValues>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: initialData?.title || "",
-      content: initialData?.content || "",
+      title: initialData?.title ?? "",
+      content: initialData?.content ?? "",
       active: initialData?.active ?? true,
     },
   });
@@ -191,6 +195,8 @@ export function EventForm({ initialData }: EventFormProps) {
     id: number;
     url: string;
   }) => {
+    if (!initialData?.id) return;
+
     const confirmed = confirm("이미지를 삭제하시겠습니까?");
     if (!confirmed) return;
 
@@ -269,6 +275,8 @@ export function EventForm({ initialData }: EventFormProps) {
       toast.success(result.message);
       router.push("/admin/manage-events");
       router.refresh();
+      form.reset();
+      onSuccess?.();
     } catch (error) {
       console.error(error);
       toast.error(

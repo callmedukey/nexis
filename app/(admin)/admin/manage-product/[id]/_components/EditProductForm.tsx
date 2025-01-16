@@ -84,6 +84,7 @@ export default function EditProductForm({ initialCategories }: Props) {
         status: context.status,
         isNew: context.isNew,
         isRecommended: context.isRecommended,
+        specialDelivery: context.specialDelivery,
       });
 
       if (!result.success) {

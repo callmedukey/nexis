@@ -20,6 +20,7 @@ export const ROUTES = {
   MANAGE_PRODUCT_ADD: "/admin/manage-product/add",
   MANAGE_CATEGORY: "/admin/manage-category",
   MANAGE_EVENTS: "/admin/manage-events",
+  AFTER_LOGIN: "/account/history",
 };
 
 export const ADMIN_ROUTES = [

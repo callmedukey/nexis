@@ -9,9 +9,9 @@ import ContextProvider, {
 } from "../add/_providers/ContextProvider";
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function Page({ params }: Props) {
@@ -80,6 +80,7 @@ export default async function Page({ params }: Props) {
     status: product.status,
     isNew: product.isNew,
     isRecommended: product.isRecommended,
+    specialDelivery: product.specialDelivery,
   };
 
   const categories = await prisma.category.findMany({

@@ -16,9 +16,9 @@ import { ProductProvider } from "./_components/ProductContext";
 import { ShareButton } from "./_components/ShareButton";
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function Page({ params }: Props) {

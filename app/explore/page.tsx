@@ -10,7 +10,7 @@ import { BusCategoryDrawer } from "./_components/BusCategoryDrawer";
 const POSTS_PER_PAGE = 100;
 
 interface Props {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function ExplorePage({ searchParams }: Props) {
