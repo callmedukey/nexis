@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -43,9 +43,25 @@ const ProfileEditDrawer = ({
   isRedirected,
 }: ProfileEditDrawerProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(isRedirected);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const { update: updateSession } = useSession();
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => {
+      document.body.style.pointerEvents = "auto";
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isMounted && isRedirected) {
+      setIsOpen(true);
+      router.replace("/account/profile");
+    }
+  }, [isMounted, isRedirected, router]);
+
   const form = useForm<UserProfileData>({
     resolver: zodResolver(UserProfileSchema),
     defaultValues: {
@@ -84,7 +100,11 @@ const ProfileEditDrawer = ({
   };
 
   return (
-    <Drawer open={isOpen} onOpenChange={setIsOpen}>
+    <Drawer
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      shouldScaleBackground={false}
+    >
       <DrawerTrigger asChild>
         <span className="rounded-full border border-primaryblack px-4 py-1 text-primaryblack transition-all duration-300 ~text-[0.875rem]/xl hover:bg-primaryblack hover:text-white">
           회원 정보 수정
@@ -97,7 +117,7 @@ const ProfileEditDrawer = ({
             아래 정보를 입력해주세요.
           </DrawerDescription>
         </DrawerHeader>
-        <div className="">
+        <div className="relative">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
