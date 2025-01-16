@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
-import { ServerResponse } from "@/lib/types";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -21,7 +20,10 @@ export async function POST(req: Request) {
     const result = await postSchema.safeParseAsync(body);
 
     if (!result.success) {
-      return ServerResponse.error("Invalid input");
+      return NextResponse.json(
+        { success: false, error: "Invalid input" },
+        { status: 400 }
+      );
     }
 
     const { title, content, thumbnailId } = result.data;
@@ -32,17 +34,25 @@ export async function POST(req: Request) {
         content,
         ...(thumbnailId && {
           thumbnail: {
-            connect: {
-              id: thumbnailId,
+            create: {
+              url: `/uploads/posts/${thumbnailId}`,
+              filename: thumbnailId,
+              filetype: thumbnailId.split(".").pop() || "png",
             },
           },
         }),
       },
+      include: {
+        thumbnail: true,
+      },
     });
 
-    return ServerResponse.success(post);
+    return NextResponse.json({ success: true, data: post }, { status: 200 });
   } catch (error) {
     console.error("[POSTS]", error);
-    return ServerResponse.error("Internal error");
+    return NextResponse.json(
+      { success: false, error: "Internal error" },
+      { status: 500 }
+    );
   }
-} 
+}
