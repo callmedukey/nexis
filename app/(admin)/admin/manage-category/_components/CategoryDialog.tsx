@@ -20,7 +20,9 @@ import { ThumbnailUploader } from "./ThumbnailUploader";
 const schema = z
   .object({
     name: z.string().min(1, "카테고리 이름을 입력해주세요"),
-    thumbnail: z.instanceof(File, { message: "썸네일 이미지를 선택해주세요" }).optional(),
+    thumbnail: z
+      .instanceof(File, { message: "썸네일 이미지를 선택해주세요" })
+      .optional(),
   })
   .strict();
 
@@ -98,7 +100,9 @@ export function CategoryDialog({
       await onSubmit({ name, thumbnail });
       onOpenChange(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "카테고리 저장에 실패했습니다");
+      toast.error(
+        error instanceof Error ? error.message : "카테고리 저장에 실패했습니다"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -129,7 +133,9 @@ export function CategoryDialog({
                   value={thumbnailPreview}
                   onChange={handleThumbnailChange}
                   className="w-full"
-                  isExisting={!!category?.categoryThumbnail[0]?.url && !thumbnail}
+                  isExisting={
+                    !!category?.categoryThumbnail[0]?.url && !thumbnail
+                  }
                 />
               </div>
             </div>
@@ -150,4 +156,4 @@ export function CategoryDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}

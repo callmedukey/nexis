@@ -1,6 +1,6 @@
 "use client";
 
-import { Category, CategoryThumbnail, SubCategory } from "@prisma/client";
+import { Category, SubCategory } from "@prisma/client";
 import { ChevronDown, Edit, ImageIcon, Plus, Trash } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -23,10 +23,14 @@ interface CategoryListProps {
     categoryThumbnail: { url: string }[];
   })[];
   onAddCategory: () => void;
-  onEditCategory: (category: Category & { categoryThumbnail: { url: string }[] }) => void;
+  onEditCategory: (
+    category: Category & { categoryThumbnail: { url: string }[] }
+  ) => void;
   onDeleteCategory: (id: number) => void;
   onAddSubCategory: (categoryId: number) => void;
-  onEditSubCategory: (subCategory: SubCategory & { categoryThumbnail: { url: string }[] }) => void;
+  onEditSubCategory: (
+    subCategory: SubCategory & { categoryThumbnail: { url: string }[] }
+  ) => void;
   onDeleteSubCategory: (id: number) => void;
 }
 
@@ -70,7 +74,9 @@ export function CategoryList({
                           <ImageIcon className="size-4 text-muted-foreground" />
                         </div>
                       )}
-                      <CardTitle className="text-base">{category.name}</CardTitle>
+                      <CardTitle className="text-base">
+                        {category.name}
+                      </CardTitle>
                     </CollapsibleTrigger>
                     <CardDescription className="flex items-center gap-2">
                       <span>({category.subCategory.length})</span>
@@ -136,7 +142,9 @@ export function CategoryList({
                                 <ImageIcon className="size-4 text-muted-foreground" />
                               </div>
                             )}
-                            <span className="text-sm font-medium">{sub.name}</span>
+                            <span className="text-sm font-medium">
+                              {sub.name}
+                            </span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Button
@@ -174,4 +182,4 @@ export function CategoryList({
       </div>
     </div>
   );
-} 
+}
