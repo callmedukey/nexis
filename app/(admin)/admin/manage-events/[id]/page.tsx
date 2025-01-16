@@ -17,7 +17,9 @@ export default async function Page({ params }: Props) {
     redirect("/");
   }
 
-  const { id } = await params;
+  // Await the route parameter
+  const awaitedParams = await params;
+  const { id } = awaitedParams;
 
   // Handle the "new" route
   if (id === "new") {
