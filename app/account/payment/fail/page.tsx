@@ -1,16 +1,16 @@
 import { Card, CardContent } from "@/components/ui/card";
 
 interface PaymentFailPageProps {
-  searchParams: {
+  searchParams: Promise<{
     orderId?: string;
     message?: string;
-  };
+  }>;
 }
 
-export default function PaymentFailPage({
+export default async function PaymentFailPage({
   searchParams,
 }: PaymentFailPageProps) {
-  const { message = "결제에 실패했습니다" } = searchParams;
+  const { message = "결제에 실패했습니다" } = await searchParams;
 
   return (
     <div className="container mx-auto p-4">
