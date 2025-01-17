@@ -8,9 +8,9 @@ import prisma from "@/lib/prisma";
 import { HistoryButton } from "./_components/HistoryButton";
 
 interface PaymentSuccessPageProps {
-  searchParams: {
+  searchParams: Promise<{
     orderId?: string;
-  };
+  }>;
 }
 
 export default async function PaymentSuccessPage({
@@ -21,7 +21,7 @@ export default async function PaymentSuccessPage({
     redirect("/");
   }
 
-  const { orderId } = searchParams;
+  const { orderId } = await searchParams;
   if (!orderId) {
     redirect("/");
   }
