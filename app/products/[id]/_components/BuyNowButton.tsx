@@ -29,16 +29,18 @@ export function BuyNowButton({
   const handleBuyNow = () => {
     onClick(() => {
       startTransition(async () => {
-        const optionIndex = selectedOption ? options.indexOf(selectedOption) : undefined;
-        const result = await addToCart({ 
-          productId, 
+        const optionIndex = selectedOption
+          ? options.indexOf(selectedOption)
+          : undefined;
+        const result = await addToCart({
+          productId,
           quantity,
           optionIndex,
         });
 
         if (result.success) {
-          // Redirect to checkout
-          window.location.href = "/checkout";
+          // Redirect to cart instead of checkout
+          window.location.href = "/cart";
         } else {
           toast.error(result.message || "주문에 실패했습니다");
         }
@@ -55,4 +57,4 @@ export function BuyNowButton({
       {isPending ? "처리 중..." : "바로 구매"}
     </Button>
   );
-} 
+}

@@ -24,6 +24,14 @@ enum ProductStatus {
   SOLDOUT
 }
 
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
 model User {
   id String @id @default(uuid())
 
@@ -61,6 +69,10 @@ model Order {
   orderContent Json
 
   status  PurchaseStatus
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentKey String?
+  paymentMethod String?
+  virtualAccountInfo Json?
   price Int
   discount Int
 
@@ -79,6 +91,7 @@ model Order {
   updatedAt DateTime @updatedAt
 
   @@index([userId, id])
+  @@index([paymentKey])
 }
 
 model DeliveryAddress {
@@ -305,6 +318,17 @@ model CartItem {
 
   @@index([cartId])
   @@index([productId])
+}
+
+model TemporaryOrder {
+  id        String   @id
+  userId    String
+  orderData Json
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 

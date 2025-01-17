@@ -2,6 +2,7 @@
 
 import { Minus, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -22,6 +23,7 @@ interface CartItemProps {
       url: string;
     }>;
   };
+  onQuantityChange?: () => void;
 }
 
 export function CartItem({
@@ -29,6 +31,7 @@ export function CartItem({
   quantity,
   product,
   selectedOption,
+  onQuantityChange,
 }: CartItemProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,6 +47,8 @@ export function CartItem({
 
       if (!response.success) {
         toast.error(response.message);
+      } else {
+        onQuantityChange?.();
       }
     } catch {
       toast.error("수량 변경에 실패했습니다");
@@ -74,7 +79,10 @@ export function CartItem({
 
   return (
     <div className="flex gap-4">
-      <div className="relative aspect-square size-24 overflow-hidden rounded-lg">
+      <Link
+        href={`/products/${product.id}`}
+        className="relative aspect-square size-24 overflow-hidden rounded-lg"
+      >
         {product.productMainImages[0] && (
           <Image
             src={product.productMainImages[0].url}
@@ -83,10 +91,12 @@ export function CartItem({
             className="object-cover"
           />
         )}
-      </div>
+      </Link>
       <div className="flex flex-1 flex-col justify-between">
         <div>
-          <h3 className="font-medium">{product.name}</h3>
+          <Link href={`/products/${product.id}`}>
+            <h3 className="font-medium hover:underline">{product.name}</h3>
+          </Link>
           <p className="text-sm text-muted-foreground">{product.description}</p>
           {selectedOption && (
             <p className="mt-1 text-sm text-muted-foreground">

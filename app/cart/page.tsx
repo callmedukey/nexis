@@ -1,36 +1,56 @@
-import { redirect } from "next/navigation";
+"use client";
 
+import { redirect } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+
+import { getCartItems } from "@/actions/cart";
 import { OrderSummary } from "@/app/cart/_components/OrderSummary";
-import { auth } from "@/auth";
 import { CartItem } from "@/components/cart/CartItem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import prisma from "@/lib/prisma";
+import { toast } from "sonner";
 
-async function getCart(userId: string) {
-  return prisma.cart.findUnique({
-    where: { providerId: userId },
-    include: {
-      items: {
-        include: {
-          product: {
-            include: {
-              productMainImages: true,
-            },
-          },
-        },
-      },
-      user: true,
-    },
-  });
-}
+type CartData = NonNullable<Awaited<ReturnType<typeof getCartItems>>["data"]>;
 
-export default async function CartPage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/");
+export default function CartPage() {
+  const [cart, setCart] = useState<CartData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchCart = useCallback(async () => {
+    try {
+      const result = await getCartItems();
+
+      if (!result.success) {
+        toast.error(result.message);
+        if (result.message === "로그인이 필요합니다") {
+          redirect("/");
+        }
+        return;
+      }
+
+      setCart(result.data || null);
+    } catch (error) {
+      toast.error("장바구니를 불러오는데 실패했습니다");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-4 min-h-screen">
+        <Card>
+          <CardContent className="flex min-h-[300px] items-center justify-center">
+            <p className="text-muted-foreground">Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
-  const cart = await getCart(session.user.id);
   const items = cart?.items || [];
 
   const originalTotal = items.reduce(
@@ -81,6 +101,7 @@ export default async function CartPage() {
                     quantity={item.quantity}
                     product={item.product}
                     selectedOption={item.selectedOption}
+                    onQuantityChange={fetchCart}
                   />
                 ))}
               </CardContent>

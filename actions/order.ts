@@ -2,6 +2,7 @@
 
 import { PurchaseStatus } from "@prisma/client";
 import { format } from "date-fns";
+import { cookies } from "next/headers";
 import { z } from "zod";
 
 import { auth } from "@/auth";
@@ -58,28 +59,49 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
       }
     }
 
-    // Generate custom order ID (YYYYMMDD + 4 digits)
+    // Generate unique order ID
     const today = format(new Date(), "yyyyMMdd");
 
-    // Get the last order of the day to determine the sequence number
-    const lastOrder = await prisma.order.findFirst({
-      where: {
-        id: {
-          startsWith: today,
+    // Get the last sequence from both orders and temporary orders
+    const [lastOrder, lastTempOrder] = await Promise.all([
+      prisma.order.findFirst({
+        where: {
+          id: {
+            startsWith: today,
+          },
         },
-      },
-      orderBy: {
-        id: "desc",
-      },
-    });
+        orderBy: {
+          id: "desc",
+        },
+      }),
+      prisma.temporaryOrder.findFirst({
+        where: {
+          id: {
+            startsWith: today,
+          },
+        },
+        orderBy: {
+          id: "desc",
+        },
+      }),
+    ]);
 
-    let sequenceNumber = "0001";
+    // Get the highest sequence number from both
+    let lastSequence = 0;
 
     if (lastOrder) {
-      const lastSequence = parseInt(lastOrder.id.slice(-4));
-      sequenceNumber = String(lastSequence + 1).padStart(4, "0");
+      lastSequence = Math.max(lastSequence, parseInt(lastOrder.id.slice(-4)));
     }
 
+    if (lastTempOrder) {
+      lastSequence = Math.max(
+        lastSequence,
+        parseInt(lastTempOrder.id.slice(-4))
+      );
+    }
+
+    // Generate next sequence number
+    const sequenceNumber = String(lastSequence + 1).padStart(4, "0");
     const orderId = `${today}${sequenceNumber}`;
 
     // Calculate totals
@@ -98,94 +120,75 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
 
     const finalTotal = discountedTotal - couponDiscount;
 
-    // Create order and update stock in a transaction
-    const order = await prisma.$transaction(async (tx) => {
-      // Update product stock
-      for (const item of cart.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: item.quantity,
-            },
-          },
-        });
-      }
+    // Store temporary order data
+    const orderData = {
+      orderId,
+      userId: session.user.id,
+      deliveryInfo: data.deliveryInfo,
+      cartItems: cart.items.map((item) => ({
+        productId: item.productId,
+        productName: item.product.name,
+        quantity: item.quantity,
+        price: Math.round(
+          item.product.price * (1 - item.product.discount / 100)
+        ),
+        originalPrice: item.product.price,
+        selectedOption: item.selectedOption,
+        subTotalPrice:
+          item.quantity *
+          Math.round(item.product.price * (1 - item.product.discount / 100)),
+      })),
+      price: finalTotal,
+      discount: couponDiscount,
+      originalTotal,
+    };
 
-      if (data.deliveryInfo.setAsDefault) {
-        await tx.user.update({
-          where: { providerId: session.user.id },
-          data: {
-            name: data.deliveryInfo.name,
-            phone: data.deliveryInfo.phone,
-            address: data.deliveryInfo.address,
-            detailedAddress: data.deliveryInfo.detailedAddress,
-            zipcode: data.deliveryInfo.zipcode,
-          },
-        });
-      }
-
-      // Create the order
-      return await tx.order.create({
-        data: {
-          id: orderId,
-          user: {
-            connect: {
-              providerId: session.user.id,
-            },
-          },
-          status: PurchaseStatus.PENDING,
-          deliveryAddress: {
-            create: {
-              name: data.deliveryInfo.name,
-              phone: data.deliveryInfo.phone,
-              address: data.deliveryInfo.address,
-              detailedAddress: data.deliveryInfo.detailedAddress,
-              zipcode: data.deliveryInfo.zipcode,
-            },
-          },
-          price: finalTotal,
-          discount: couponDiscount,
-          products: {
-            connect: cart.items.map((item) => ({
-              id: item.productId,
-            })),
-          },
-          orderContent: {
-            products: cart.items.map((item) => ({
-              productId: item.productId,
-              productName: item.product.name,
-              quantity: item.quantity,
-              price: Math.round(
-                item.product.price * (1 - item.product.discount / 100)
-              ),
-              originalPrice: item.product.price,
-              selectedOption: item.selectedOption,
-              subTotalPrice:
-                item.quantity *
-                Math.round(
-                  item.product.price * (1 - item.product.discount / 100)
-                ),
-            })),
-            totalAmount: finalTotal,
-            originalAmount: originalTotal,
-            couponDiscount,
-          },
-        },
-      });
+    // Delete any existing temporary orders for this user
+    await prisma.temporaryOrder.deleteMany({
+      where: { userId: session.user.id },
     });
 
-    // Clear cart
-    await prisma.cart.update({
-      where: { providerId: session.user.id },
+    // Create new temporary order
+    await prisma.temporaryOrder.create({
       data: {
-        items: {
-          deleteMany: {},
-        },
+        id: orderId,
+        userId: session.user.id,
+        orderData: orderData as any,
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000), // Expires in 30 minutes
       },
     });
 
-    return { success: true, orderId: order.id };
+    // Initialize payment
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const cookieHeader = (await cookies()).toString();
+    const paymentResponse = await fetch(`${baseUrl}/api/payments/initialize`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookieHeader,
+      },
+      body: JSON.stringify({
+        orderId: orderId,
+      }),
+      cache: "no-store",
+    });
+
+    const paymentData = await paymentResponse.json();
+
+    if (!paymentResponse.ok) {
+      // Clean up temporary order if payment initialization fails
+      await prisma.temporaryOrder
+        .delete({
+          where: { id: orderId },
+        })
+        .catch(() => {
+          // Ignore deletion errors
+        });
+      console.error("Payment initialization failed:", paymentData);
+      return { error: "결제 초기화에 실패했습니다" };
+    }
+
+    return { success: true, orderId, paymentData };
   } catch (error) {
     console.error("Order submission error:", error);
     return { error: "Failed to submit order" };

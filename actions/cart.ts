@@ -153,7 +153,7 @@ export async function updateCartItem(
     return {
       success: false,
       errors: {
-        form: ["잘못된 ���력 데이터입니다"],
+        form: ["잘못된 입력 데이터입니다"],
       },
     };
   }
@@ -290,6 +290,45 @@ export async function validateCoupon(
     return {
       success: false,
       message: "쿠폰 확인 중 오류가 발생했습니다",
+    };
+  }
+}
+
+export async function getCartItems() {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: "로그인이 필요합니다",
+      };
+    }
+
+    const cart = await prisma.cart.findUnique({
+      where: { providerId: session.user.id },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                productMainImages: true,
+              },
+            },
+          },
+        },
+        user: true,
+      },
+    });
+
+    return {
+      success: true,
+      data: cart,
+    };
+  } catch (error) {
+    console.error("[GET_CART]", error);
+    return {
+      success: false,
+      message: "장바구니를 불러오는데 실패했습니다",
     };
   }
 }
