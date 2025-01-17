@@ -4,10 +4,10 @@ import { stat, readFile } from "fs/promises";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  context: { params: { path: string[] } }
 ) {
   try {
-    const filePath = join(process.cwd(), "uploads", ...params.path);
+    const filePath = join(process.cwd(), "uploads", ...context.params.path);
 
     // Check if file exists
     await stat(filePath);
