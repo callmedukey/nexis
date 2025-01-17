@@ -4,41 +4,44 @@ import type { NextRequest } from "next/server";
 import { join } from "path";
 import { stat, readFile } from "fs/promises";
 
-export async function middleware(request: NextRequest) {
-  // Handle uploads
-  if (request.nextUrl.pathname.startsWith("/uploads/")) {
-    try {
-      const filePath = join(process.cwd(), "public", request.nextUrl.pathname);
+export default auth((req) => {
+  if (req.nextUrl.pathname.startsWith("/uploads/")) {
+    const handleUploads = async () => {
+      try {
+        const filePath = join(process.cwd(), "public", req.nextUrl.pathname);
 
-      // Check if file exists
-      await stat(filePath);
+        // Check if file exists
+        await stat(filePath);
 
-      // Read file
-      const fileBuffer = await readFile(filePath);
+        // Read file
+        const fileBuffer = await readFile(filePath);
 
-      // Determine content type
-      const ext = filePath.split(".").pop()?.toLowerCase();
-      const contentType = ext ? `image/${ext}` : "application/octet-stream";
+        // Determine content type
+        const ext = filePath.split(".").pop()?.toLowerCase();
+        const contentType = ext ? `image/${ext}` : "application/octet-stream";
 
-      // Return file with appropriate headers
-      return new NextResponse(fileBuffer, {
-        headers: {
-          "Content-Type": contentType,
-          "Cache-Control": "public, max-age=1800, must-revalidate",
-        },
-      });
-    } catch (error) {
-      return NextResponse.next();
-    }
+        // Return file with appropriate headers
+        return new NextResponse(fileBuffer, {
+          headers: {
+            "Content-Type": contentType,
+            "Cache-Control": "public, max-age=1800, must-revalidate",
+          },
+        });
+      } catch (error) {
+        return NextResponse.next();
+      }
+    };
+
+    return handleUploads();
   }
 
-  // Handle auth for admin routes
-  if (request.nextUrl.pathname.startsWith("/admin/")) {
-    return auth();
+  // Only protect admin routes
+  if (req.nextUrl.pathname.startsWith("/admin/")) {
+    return NextResponse.next();
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: ["/admin/:path*", "/uploads/:path*"],
