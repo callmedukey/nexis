@@ -1,6 +1,6 @@
 "server only";
 import crypto from "crypto";
-import { writeFile, access, mkdir, chmod } from "fs/promises";
+import { writeFile, access, mkdir, chmod, stat } from "fs/promises";
 import path from "path";
 
 export async function uploadImage(
@@ -19,32 +19,30 @@ export async function uploadImage(
       .digest("hex");
     const filename = `${hash}${ext}`;
 
-    // Create the full path - store directly in public
-    const uploadDir = path.join(process.cwd(), "public", "uploads", folder);
+    // Create the full path - ensure we're in the public directory
+    const publicDir = path.join(process.cwd(), "public");
+    const uploadDir = path.join(publicDir, "uploads", folder);
     const filePath = path.join(uploadDir, filename);
-    // URL path should be relative to public
     const fileUrl = `/uploads/${folder}/${filename}`;
 
-    // Ensure the directory exists with proper permissions
+    // Ensure the public directory exists
+    await createDirectoryIfNotExists(publicDir);
+    // Ensure the uploads directory exists
+    await createDirectoryIfNotExists(path.join(publicDir, "uploads"));
+    // Ensure the specific folder exists
     await createDirectoryIfNotExists(uploadDir);
 
     // Write the file
     await writeFile(filePath, buffer);
 
-    // Set proper permissions after writing
+    // Verify the file was written successfully and has content
     try {
-      await chmod(filePath, 0o644);
-      await chmod(uploadDir, 0o755);
+      const stats = await stat(filePath);
+      if (stats.size === 0) {
+        throw new Error("File was written but is empty");
+      }
     } catch (error) {
-      console.error("Failed to set permissions:", error);
-      // Don't throw here as the file was written successfully
-    }
-
-    // Verify the file was written successfully
-    try {
-      await access(filePath);
-    } catch (error) {
-      console.error("Failed to verify file write:", error);
+      console.error("Failed to verify file:", error);
       throw new Error("Failed to verify file write");
     }
 
@@ -62,12 +60,6 @@ async function createDirectoryIfNotExists(dir: string) {
   try {
     await access(dir);
   } catch {
-    // Create directory with proper permissions
     await mkdir(dir, { recursive: true });
-    try {
-      await chmod(dir, 0o755);
-    } catch (error) {
-      console.error("Failed to set directory permissions:", error);
-    }
   }
 }

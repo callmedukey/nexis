@@ -18,16 +18,14 @@ const nextConfig: NextConfig = {
       },
     ],
     unoptimized: process.env.NODE_ENV === "development",
-    domains: ["localhost", "127.0.0.1"],
   },
-  output: "standalone",
   distDir: ".next",
   async rewrites() {
     return {
       beforeFiles: [
         {
           source: "/uploads/:path*",
-          destination: "/uploads/:path*",
+          destination: "/public/uploads/:path*",
         },
       ],
       afterFiles: [],
@@ -42,10 +40,6 @@ const nextConfig: NextConfig = {
           {
             key: "Cache-Control",
             value: "public, max-age=31536000, immutable",
-          },
-          {
-            key: "Content-Type",
-            value: "image/jpeg,image/png,image/gif",
           },
         ],
       },
