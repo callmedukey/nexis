@@ -1,5 +1,4 @@
 import { ChevronRight } from "lucide-react";
-import type { Revalidate } from "next/dist/server/lib/revalidate";
 import Image from "next/image";
 import Link from "next/link";
 

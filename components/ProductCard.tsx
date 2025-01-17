@@ -40,7 +40,7 @@ export function ProductCard({ product }: ProductCardProps) {
       setLoading(true);
       const response = await addToCart({ productId: product.id, quantity: 1 });
       if (response.success) {
-        toast.success(response.message || "장바구니에 ��가되었습니다");
+        toast.success(response.message || "장바구니에 추가되었습니다");
       } else {
         toast.error(response.message || "장바구니 추가에 실패했습니다");
       }
@@ -119,13 +119,13 @@ export function ProductCard({ product }: ProductCardProps) {
             <p className="line-clamp-2 text-xs text-muted-foreground">
               {product.description}
             </p>
-            {product.discount > 0 && (
-              <div className="!mt-4 text-sm font-semibold text-primaryred">
-                {product.discount}% 할인
-              </div>
-            )}
-            <div className="!mt-0 flex items-baseline gap-2 text-2xl">
-              <span className="font-bold">
+            <div className="flex items-baseline gap-2">
+              {product.discount > 0 && (
+                <span className="text-sm font-semibold text-primaryred">
+                  {product.discount}% 할인
+                </span>
+              )}
+              <span className="text-2xl font-bold">
                 <span className="text-sm tracking-[-0.15rem]">₩</span>{" "}
                 {Math.round(
                   product.price * (1 - product.discount / 100)
