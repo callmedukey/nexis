@@ -72,7 +72,7 @@ const EditImagesUploader = () => {
     accept: {
       "image/*": [".jpg", ".jpeg", ".png", ".gif"],
     },
-    maxSize: 1024 * 1024 * 5,
+    maxSize: 1024 * 1024 * 10,
     multiple: true,
     maxFiles: 10,
   };

@@ -5,25 +5,37 @@ import { useContext, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 import { FileUploader } from "@/components/extension/file-uploader";
+import { ImageWithFallback } from "./ImageWithFallback";
 
 import { FileInputWrapper } from "./FileInputWrapper";
 import { Context } from "../_providers/ContextProvider";
+
+type ImageFile = File & { url?: string };
+
+interface ExistingImage {
+  id: number;
+  url: string;
+}
 
 const ImagesUploader = () => {
   const [context, setContext] = useContext(Context);
 
   // Create stable object URLs that persist across renders
   const imageUrls = useMemo(() => {
-    return context.productMainImages.map((file) => ({
+    return context.productMainImages.map((file: ImageFile | ExistingImage) => ({
       file,
-      url: URL.createObjectURL(file),
+      url: file instanceof File ? URL.createObjectURL(file) : file.url,
     }));
   }, [context.productMainImages]);
 
   // Cleanup object URLs when component unmounts or images change
   useEffect(() => {
     return () => {
-      imageUrls.forEach(({ url }) => URL.revokeObjectURL(url));
+      imageUrls.forEach(({ url, file }) => {
+        if (file instanceof File && url) {
+          URL.revokeObjectURL(url);
+        }
+      });
     };
   }, [imageUrls]);
 
@@ -31,12 +43,12 @@ const ImagesUploader = () => {
     accept: {
       "image/*": [".jpg", ".jpeg", ".png", ".gif"],
     },
-    maxSize: 1024 * 1024 * 5, // 5MB
+    maxSize: 1024 * 1024 * 10, // 5MB
     multiple: true,
     maxFiles: 10,
     onDrop: (acceptedFiles: File[]) => {
       if (acceptedFiles.length + context.productMainImages.length > 10) {
-        toast.error("최대 10개의 이미지만 ���로드할 수 있습니다");
+        toast.error("최대 10개의 이미지만 업로드할 수 있습니다");
         return;
       }
 
@@ -61,6 +73,10 @@ const ImagesUploader = () => {
   const handleRemoveImage = (index: number) => {
     setContext((prev) => {
       const newFiles = [...prev.productMainImages];
+      const removedFile = newFiles[index];
+      if (removedFile instanceof File) {
+        URL.revokeObjectURL(imageUrls[index].url);
+      }
       newFiles.splice(index, 1);
       return {
         ...prev,
@@ -116,7 +132,7 @@ const ImagesUploader = () => {
                   <path d="m6 6 12 12" />
                 </svg>
               </button>
-              <Image
+              <ImageWithFallback
                 src={url}
                 alt={`상품 이미지 ${index + 1}`}
                 width={400}

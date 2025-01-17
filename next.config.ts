@@ -6,7 +6,20 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "100mb",
     },
   },
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
+    unoptimized: process.env.NODE_ENV === "development",
+    domains: ["localhost", "127.0.0.1"],
+  },
 };
 
 export default nextConfig;
