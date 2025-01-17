@@ -20,10 +20,10 @@ export async function uploadImage(
     const filename = `${hash}${ext}`;
 
     // Create paths
-    const uploadDir = path.join(process.cwd(), "public/uploads", folder);
+    const uploadDir = path.join(process.cwd(), "uploads", folder);
     const filePath = path.join(uploadDir, filename);
-    // URL path matches the rewrite configuration
-    const fileUrl = `/uploads/${folder}/${filename}`;
+    // URL path now points to our API route
+    const fileUrl = `/api/uploads/${folder}/${filename}`;
 
     // Ensure upload directory exists
     await createDirectoryIfNotExists(uploadDir);
