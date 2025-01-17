@@ -57,7 +57,7 @@ export const ADMIN_ROUTES = [
 export const AUTH_ACCOUNT_ROUTES = [
   { label: "마이 페이지", url: ROUTES.ACCOUNT },
   { label: "구매 내역", url: ROUTES.PURCHASES },
-  { label: "게정 관리", url: ROUTES.PROFILE },
+  { label: "계정 관리", url: ROUTES.PROFILE },
   { label: "고객센터", url: ROUTES.CS },
   { label: "로그아웃", url: ROUTES.LOGOUT },
 ];
