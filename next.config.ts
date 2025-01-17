@@ -20,14 +20,6 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   distDir: ".next",
-  async rewrites() {
-    return [
-      {
-        source: "/uploads/:path*",
-        destination: "/public/uploads/:path*",
-      },
-    ];
-  },
   async headers() {
     return [
       {
@@ -35,7 +27,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "no-cache, no-store, must-revalidate",
+            value: "public, max-age=1800, must-revalidate",
           },
           {
             key: "Content-Type",
