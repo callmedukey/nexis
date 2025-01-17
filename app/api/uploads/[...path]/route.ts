@@ -2,13 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { join } from "path";
 import { stat, readFile } from "fs/promises";
 
-type RouteContext = {
-  params: {
-    path: string[];
-  };
-};
-
-export async function GET(request: NextRequest, { params }: RouteContext) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { path: string[] } }
+) {
   try {
     const filePath = join(process.cwd(), "uploads", ...params.path);
 
