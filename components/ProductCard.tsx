@@ -113,6 +113,11 @@ export function ProductCard({ product }: ProductCardProps) {
                 className="object-fill transition-transform group-hover:scale-105"
               />
             )}
+            {product.discount > 0 && (
+              <div className="absolute -left-0 -top-0 flex size-8 items-center justify-center rounded-full bg-primaryred text-xs font-bold text-white sm:hidden">
+                {product.discount}%
+              </div>
+            )}
           </div>
           <div className="space-y-2 p-2">
             <h3 className="truncate text-sm font-bold">{product.name}</h3>
@@ -121,7 +126,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </p>
             <div className="flex items-baseline gap-2">
               {product.discount > 0 && (
-                <span className="text-sm font-semibold text-primaryred">
+                <span className="hidden text-sm font-semibold text-primaryred sm:inline">
                   {product.discount}% 할인
                 </span>
               )}
