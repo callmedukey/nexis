@@ -18,24 +18,15 @@ const nextConfig: NextConfig = {
       },
     ],
     unoptimized: true,
-    localPatterns: [
-      {
-        pathname: "/uploads/**",
-      },
-    ],
   },
   distDir: ".next",
   async rewrites() {
-    return {
-      beforeFiles: [
-        {
-          source: "/uploads/:path*",
-          destination: "/uploads/:path*",
-        },
-      ],
-      afterFiles: [],
-      fallback: [],
-    };
+    return [
+      {
+        source: "/uploads/:path*",
+        destination: "/public/uploads/:path*",
+      },
+    ];
   },
   async headers() {
     return [
@@ -44,7 +35,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
+            value: "no-cache, no-store, must-revalidate",
           },
           {
             key: "Content-Type",
