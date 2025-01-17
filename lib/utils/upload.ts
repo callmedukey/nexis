@@ -1,6 +1,6 @@
 "server only";
 import crypto from "crypto";
-import { writeFile, access, mkdir, chmod, stat } from "fs/promises";
+import { writeFile, access, mkdir, stat } from "fs/promises";
 import path from "path";
 
 export async function uploadImage(
@@ -19,17 +19,13 @@ export async function uploadImage(
       .digest("hex");
     const filename = `${hash}${ext}`;
 
-    // Create the full path - ensure we're in the public directory
-    const publicDir = path.join(process.cwd(), "public");
-    const uploadDir = path.join(publicDir, "uploads", folder);
+    // Create paths
+    const uploadDir = path.join(process.cwd(), "public/uploads", folder);
     const filePath = path.join(uploadDir, filename);
+    // URL path matches the rewrite configuration
     const fileUrl = `/uploads/${folder}/${filename}`;
 
-    // Ensure the public directory exists
-    await createDirectoryIfNotExists(publicDir);
-    // Ensure the uploads directory exists
-    await createDirectoryIfNotExists(path.join(publicDir, "uploads"));
-    // Ensure the specific folder exists
+    // Ensure upload directory exists
     await createDirectoryIfNotExists(uploadDir);
 
     // Write the file
@@ -41,6 +37,9 @@ export async function uploadImage(
       if (stats.size === 0) {
         throw new Error("File was written but is empty");
       }
+
+      // Verify file is accessible
+      await access(filePath);
     } catch (error) {
       console.error("Failed to verify file:", error);
       throw new Error("Failed to verify file write");
