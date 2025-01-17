@@ -1,13 +1,17 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { join } from "path";
 import { stat, readFile } from "fs/promises";
+import { auth } from "@/auth";
 
-// Separate middleware for file serving
-export async function middleware(request: NextRequest) {
+export const middleware = auth(async (request) => {
+  // Handle uploads
   if (request.nextUrl.pathname.startsWith("/uploads/")) {
     try {
-      const filePath = join(process.cwd(), "public", request.nextUrl.pathname);
+      const filePath = join(
+        process.cwd(),
+        "uploads",
+        request.nextUrl.pathname.replace("/uploads/", "")
+      );
 
       // Check if file exists
       await stat(filePath);
@@ -33,9 +37,8 @@ export async function middleware(request: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
-// Configure middleware to run only for upload paths
 export const config = {
-  matcher: ["/uploads/:path*"],
+  matcher: ["/uploads/:path*", "/admin/:path*"],
 };
