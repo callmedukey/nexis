@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { join } from "path";
 import { stat, readFile } from "fs/promises";
 
-export async function GET(
-  request: NextRequest,
-  context: { params: { path: string[] } }
-) {
+type RouteContext = {
+  params: {
+    path: string[];
+  };
+};
+
+export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
-    const filePath = join(process.cwd(), "uploads", ...context.params.path);
+    const filePath = join(process.cwd(), "uploads", ...params.path);
 
     // Check if file exists
     await stat(filePath);
