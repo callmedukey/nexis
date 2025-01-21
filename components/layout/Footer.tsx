@@ -11,6 +11,10 @@ const Footer = () => {
         <div className="h-[1px] bg-black max-w-[8rem] mx-auto w-full sm:hidden" />
         <dl className="[&>div]:flex [&>div]:gap-2 [&>div]:~text-xs/base space-y-2 [&>div]:justify-center [&>div]:sm:justify-start">
           <div>
+            <dt>상호명:</dt>
+            <dd>(주)카일루스</dd>
+          </div>
+          <div>
             <dt>대표:</dt>
             <dd>이강산</dd>
           </div>
