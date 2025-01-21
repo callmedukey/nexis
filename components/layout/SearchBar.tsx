@@ -66,13 +66,14 @@ export function SearchBar() {
     pathname.startsWith("/account") ||
     pathname.startsWith("/explore") ||
     pathname.startsWith("/login") ||
-    pathname.startsWith("/signup")
+    pathname.startsWith("/signup") ||
+    pathname.startsWith("/delivery-and-refund-policy")
   ) {
     return null;
   }
 
   return (
-    <div className="relative mx-auto w-full max-w-screen-lg px-4 ">
+    <div className="relative mx-auto w-full max-w-screen-lg px-4">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-primaryblack" />
         <input

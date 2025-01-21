@@ -1,8 +1,9 @@
+import Link from "next/link";
 import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="border-t border-[#111111] px-4 py-12 sm:py-6">
+    <footer className="px-4 py-12 sm:py-6">
       <div className="mx-auto grid sm:grid-cols-2 max-w-screen-lg text-center gap-y-8 sm:text-left">
         <dl className="sm:order-2 md:justify-self-center space-y-4">
           <dt className="text-base font-bold">고객센터</dt>
