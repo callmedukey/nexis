@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
+import { ROUTES } from "@/constants/general";
 
 const addToCartSchema = z.object({
   productId: z.number(),
@@ -22,6 +23,7 @@ type ServerResponse<T> = {
   data?: T;
   message?: string;
   errors?: Record<string, string[]>;
+  redirect?: string;
 };
 
 export async function addToCart(
@@ -33,6 +35,7 @@ export async function addToCart(
       return {
         success: false,
         message: "장바구니에 담으려면 로그인이 필요합니다",
+        redirect: ROUTES.LOGIN,
       };
     }
 

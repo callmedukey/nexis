@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { addToCart } from "@/actions/cart";
 import { ProductOptionsModal } from "@/components/ProductOptionsModal";
 import Share from "@/public/share.svg";
+import { useRouter } from "next/navigation";
 
 interface Product {
   id: number;
@@ -29,6 +30,7 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   const handleAddToCart = async () => {
     if (product.options && product.options.length > 0) {
@@ -42,7 +44,11 @@ export function ProductCard({ product }: ProductCardProps) {
       if (response.success) {
         toast.success(response.message || "장바구니에 추가되었습니다");
       } else {
-        toast.error(response.message || "장바구니 추가에 실패했습니다");
+        if (response.redirect) {
+          router.push(response.redirect);
+        } else {
+          toast.error(response.message || "장바구니 추가에 실패했습니다");
+        }
       }
     } catch {
       toast.error("장바구니 추가에 실패했습니다");

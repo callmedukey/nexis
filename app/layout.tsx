@@ -98,7 +98,7 @@ export default async function RootLayout({
           <SearchBar />
           {children}
           <Footer />
-          <Toaster position="top-center" />
+          <Toaster position="bottom-center" />
         </body>
       </SessionProvider>
     </html>
