@@ -3,7 +3,7 @@
 import { ShoppingCart } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
-
+import { useRouter } from "next/navigation";
 import { addToCart } from "@/actions/cart";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,13 +26,16 @@ export function AddToCartButton({
   onClick,
 }: AddToCartButtonProps) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const handleAddToCart = () => {
     onClick(() => {
       startTransition(async () => {
-        const optionIndex = selectedOption ? options.indexOf(selectedOption) : undefined;
-        const result = await addToCart({ 
-          productId, 
+        const optionIndex = selectedOption
+          ? options.indexOf(selectedOption)
+          : undefined;
+        const result = await addToCart({
+          productId,
           quantity,
           optionIndex,
         });
@@ -40,7 +43,11 @@ export function AddToCartButton({
         if (result.success) {
           toast.success("장바구니에 추가되었습니다");
         } else {
-          toast.error(result.message || "장바구니 추가에 실패했습니다");
+          if (result.redirect) {
+            router.push(result.redirect);
+          } else {
+            toast.error(result.message || "장바구니 추가에 실패했습니다");
+          }
         }
       });
     });
