@@ -1,54 +1,54 @@
+import { randomUUID } from "crypto";
+
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { randomUUID } from "crypto";
 const prisma = new PrismaClient();
 
 async function main() {
   try {
-    await prisma.user.upsert({
-      where: { email: "test@nexis.com" },
-      update: {
-        email: "test@nexis.com",
-        password: await bcrypt.hash("test2025@@", 10),
-        provider: "credentials",
-        providerId: randomUUID(),
-      },
-      create: {
-        email: "test@nexis.com",
-        password: await bcrypt.hash("test2025@@", 10),
-        provider: "credentials",
-        providerId: randomUUID(),
-      },
-    });
+    // First delete all orders since they have foreign key relationships
+    await prisma.order.deleteMany({});
+    console.log("Deleted all orders");
 
-    const foundAdmin = await prisma.user.findFirst({
+    // Then delete all users
+    await prisma.user.deleteMany({});
+    console.log("Deleted all users");
+
+    await prisma.user.upsert({
       where: {
+        email: "admin@nexis.com",
+      },
+      update: {
         isAdmin: true,
       },
+      create: {
+        providerId: randomUUID(),
+        provider: "credentials",
+        name: "Admin",
+        email: "admin@nexis.com",
+        phone: "1234567890",
+        isAdmin: true,
+        password: bcrypt.hashSync("nexis2025@@", 10),
+      },
     });
 
-    if (foundAdmin) {
-      console.log("Admin already exists");
-      const firstUser = await prisma.user.findFirst();
-      if (firstUser) {
-        await prisma.user.update({
-          where: { id: firstUser.id },
-          data: { isAdmin: true },
-        });
-      } else {
-        console.log("No user found");
-      }
-    } else {
-      const firstUser = await prisma.user.findFirst();
-      if (firstUser) {
-        await prisma.user.update({
-          where: { id: firstUser.id },
-          data: { isAdmin: true },
-        });
-      } else {
-        console.log("No user found");
-      }
-    }
+    await prisma.user.upsert({
+      where: {
+        email: "user@nexis.com",
+      },
+      update: {
+        isAdmin: false,
+      },
+      create: {
+        providerId: randomUUID(),
+        provider: "credentials",
+        name: "Test User",
+        email: "test@nexis.com",
+        phone: "1234567890",
+        isAdmin: false,
+        password: bcrypt.hashSync("nexis2025@@", 10),
+      },
+    });
   } catch (error) {
     console.error(error);
   }
@@ -56,7 +56,7 @@ async function main() {
 
 main()
   .then(async () => {
-    console.log("Seeded");
+    console.log("Database wiped successfully");
     await prisma.$disconnect();
   })
   .catch(async (error) => {
