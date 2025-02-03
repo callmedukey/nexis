@@ -28,7 +28,7 @@ async function main() {
         email: "admin@nexis.com",
         phone: "1234567890",
         isAdmin: true,
-        password: bcrypt.hashSync("nexis2025@@", 10),
+        password: bcrypt.hashSync("admin2025@@", 10),
       },
     });
 
@@ -46,7 +46,7 @@ async function main() {
         email: "test@nexis.com",
         phone: "1234567890",
         isAdmin: false,
-        password: bcrypt.hashSync("nexis2025@@", 10),
+        password: bcrypt.hashSync("test2025@@", 10),
       },
     });
   } catch (error) {
