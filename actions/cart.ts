@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { auth } from "@/auth";
-import prisma from "@/lib/prisma";
 import { ROUTES } from "@/constants/general";
+import prisma from "@/lib/prisma";
 
 const addToCartSchema = z.object({
   productId: z.number(),

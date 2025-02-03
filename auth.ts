@@ -1,8 +1,8 @@
+import bcrypt from "bcryptjs";
 import NextAuth, { DefaultSession } from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 import kakao from "next-auth/providers/kakao";
 import naver from "next-auth/providers/naver";
-import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
 
 import prisma from "@/lib/prisma";
 
@@ -36,6 +36,7 @@ declare module "next-auth" {
   }
   interface User {
     isAdmin?: boolean;
+    providerId?: string;
   }
 }
 
@@ -48,7 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { type: "email", label: "Email" },
         password: { type: "password", label: "Password" },
       },
-      authorize: async (credentials, request) => {
+      authorize: async (credentials) => {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
@@ -77,6 +78,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           email: user.email,
           name: user.name,
           isAdmin: user.isAdmin,
+          providerId: user.providerId,
         };
       },
     }),
@@ -97,7 +99,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.phone = profile?.response?.mobile as string;
         }
       } else if (account?.provider === "credentials") {
-        token.userId = user.id;
+        token.userId = user.providerId;
         token.provider = "credentials";
         token.email = user.email;
         token.isAdmin = user.isAdmin || false;

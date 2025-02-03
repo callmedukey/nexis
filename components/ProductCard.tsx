@@ -3,13 +3,13 @@
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { addToCart } from "@/actions/cart";
 import { ProductOptionsModal } from "@/components/ProductOptionsModal";
 import Share from "@/public/share.svg";
-import { useRouter } from "next/navigation";
 
 interface Product {
   id: number;
