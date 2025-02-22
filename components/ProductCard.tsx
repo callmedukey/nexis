@@ -119,7 +119,9 @@ export function ProductCard({ product }: ProductCardProps) {
                   ".webp",
                   "ph.webp"
                 )}
+                placeholder="blur"
                 fill
+                priority
                 className="object-fill transition-transform group-hover:scale-105"
               />
             )}
