@@ -11,6 +11,7 @@ async function updateImageUrls() {
           { url: { startsWith: "/api/uploads" } },
           { url: { endsWith: ".jpg" } },
           { filetype: "image/jpg" },
+          { filetype: "image/jpeg" },
         ],
       },
       select: {
@@ -40,7 +41,10 @@ async function updateImageUrls() {
       SET 
         url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp'),
         filetype = 'image/webp'
-      WHERE url LIKE '/api/uploads%' OR url LIKE '%.jpg' OR filetype = 'image/jpg'
+      WHERE url LIKE '/api/uploads%' 
+        OR url LIKE '%.jpg' 
+        OR filetype = 'image/jpg'
+        OR filetype = 'image/jpeg'
     `;
 
     console.log(`\nUpdated ${mainImagesResult} product main images`);
@@ -52,6 +56,7 @@ async function updateImageUrls() {
           { url: { startsWith: "/api/uploads" } },
           { url: { endsWith: ".jpg" } },
           { filetype: "image/jpg" },
+          { filetype: "image/jpeg" },
         ],
       },
       select: {
@@ -81,7 +86,10 @@ async function updateImageUrls() {
       SET 
         url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp'),
         filetype = 'image/webp'
-      WHERE url LIKE '/api/uploads%' OR url LIKE '%.jpg' OR filetype = 'image/jpg'
+      WHERE url LIKE '/api/uploads%' 
+        OR url LIKE '%.jpg' 
+        OR filetype = 'image/jpg'
+        OR filetype = 'image/jpeg'
     `;
 
     console.log(`\nUpdated ${imagesResult} product images`);
@@ -93,6 +101,7 @@ async function updateImageUrls() {
           { url: { startsWith: "/api/uploads" } },
           { url: { endsWith: ".jpg" } },
           { filetype: "image/jpg" },
+          { filetype: "image/jpeg" },
         ],
       },
       select: {
@@ -122,7 +131,10 @@ async function updateImageUrls() {
       SET 
         url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp'),
         filetype = 'image/webp'
-      WHERE url LIKE '/api/uploads%' OR url LIKE '%.jpg' OR filetype = 'image/jpg'
+      WHERE url LIKE '/api/uploads%' 
+        OR url LIKE '%.jpg' 
+        OR filetype = 'image/jpg'
+        OR filetype = 'image/jpeg'
     `;
 
     console.log(`\nUpdated ${categoryThumbnailsResult} category thumbnails`);
@@ -134,6 +146,7 @@ async function updateImageUrls() {
           { url: { startsWith: "/api/uploads" } },
           { url: { endsWith: ".jpg" } },
           { filetype: "image/jpg" },
+          { filetype: "image/jpeg" },
         ],
       },
       select: {
@@ -163,7 +176,10 @@ async function updateImageUrls() {
       SET 
         url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp'),
         filetype = 'image/webp'
-      WHERE url LIKE '/api/uploads%' OR url LIKE '%.jpg' OR filetype = 'image/jpg'
+      WHERE url LIKE '/api/uploads%' 
+        OR url LIKE '%.jpg' 
+        OR filetype = 'image/jpg'
+        OR filetype = 'image/jpeg'
     `;
 
     console.log(`\nUpdated ${postThumbnailsResult} post thumbnails`);
