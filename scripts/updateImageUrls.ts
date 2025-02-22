@@ -64,10 +64,76 @@ async function updateImageUrls() {
 
     console.log(`\nUpdated ${imagesResult} product images`);
 
+    // Get and display categoryThumbnails before update
+    const categoryThumbnailsBefore = await prisma.categoryThumbnail.findMany({
+      where: {
+        url: {
+          startsWith: "/api/uploads",
+        },
+      },
+      select: {
+        id: true,
+        url: true,
+      },
+    });
+
+    console.log("\nCategory Thumbnails to be updated:");
+    categoryThumbnailsBefore.forEach((img) => {
+      console.log(`ID: ${img.id}`);
+      console.log(`From: ${img.url}`);
+      console.log(`To: ${img.url.replace("/api/uploads", "/uploads")}`);
+      console.log("---");
+    });
+
+    // Update categoryThumbnails
+    const categoryThumbnailsResult = await prisma.$executeRaw`
+      UPDATE "CategoryThumbnail"
+      SET url = REPLACE(url, '/api/uploads', '/uploads')
+      WHERE url LIKE '/api/uploads%'
+    `;
+
+    console.log(`\nUpdated ${categoryThumbnailsResult} category thumbnails`);
+
+    // Get and display postThumbnails before update
+    const postThumbnailsBefore = await prisma.postThumbnail.findMany({
+      where: {
+        url: {
+          startsWith: "/api/uploads",
+        },
+      },
+      select: {
+        id: true,
+        url: true,
+      },
+    });
+
+    console.log("\nPost Thumbnails to be updated:");
+    postThumbnailsBefore.forEach((img) => {
+      console.log(`ID: ${img.id}`);
+      console.log(`From: ${img.url}`);
+      console.log(`To: ${img.url.replace("/api/uploads", "/uploads")}`);
+      console.log("---");
+    });
+
+    // Update postThumbnails
+    const postThumbnailsResult = await prisma.$executeRaw`
+      UPDATE "PostThumbnail"
+      SET url = REPLACE(url, '/api/uploads', '/uploads')
+      WHERE url LIKE '/api/uploads%'
+    `;
+
+    console.log(`\nUpdated ${postThumbnailsResult} post thumbnails`);
+
     // Summary
     console.log("\nSummary:");
     console.log(`Total Main Images changed: ${mainImagesBefore.length}`);
     console.log(`Total Product Images changed: ${productImagesBefore.length}`);
+    console.log(
+      `Total Category Thumbnails changed: ${categoryThumbnailsBefore.length}`
+    );
+    console.log(
+      `Total Post Thumbnails changed: ${postThumbnailsBefore.length}`
+    );
     console.log("Successfully updated all image URLs!");
   } catch (error) {
     console.error("Error updating image URLs:", error);

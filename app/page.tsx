@@ -196,6 +196,11 @@ export default async function Home() {
                       src={category.categoryThumbnail[0].url}
                       alt={category.name}
                       fill
+                      placeholder="blur"
+                      blurDataURL={category.categoryThumbnail[0].url.replace(
+                        ".webp",
+                        "ph.webp"
+                      )}
                       sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
                       className="object-fill transition-transform group-hover:scale-105"
                     />
