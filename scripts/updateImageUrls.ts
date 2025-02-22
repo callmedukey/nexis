@@ -7,9 +7,10 @@ async function updateImageUrls() {
     // Get and display productMainImages before update
     const mainImagesBefore = await prisma.productMainImage.findMany({
       where: {
-        url: {
-          startsWith: "/api/uploads",
-        },
+        OR: [
+          { url: { startsWith: "/api/uploads" } },
+          { url: { endsWith: ".jpg" } },
+        ],
       },
       select: {
         id: true,
@@ -21,15 +22,19 @@ async function updateImageUrls() {
     mainImagesBefore.forEach((img) => {
       console.log(`ID: ${img.id}`);
       console.log(`From: ${img.url}`);
-      console.log(`To: ${img.url.replace("/api/uploads", "/uploads")}`);
+      console.log(
+        `To: ${img.url
+          .replace("/api/uploads", "/uploads")
+          .replace(".jpg", ".webp")}`
+      );
       console.log("---");
     });
 
     // Update productMainImages
     const mainImagesResult = await prisma.$executeRaw`
       UPDATE "ProductMainImage"
-      SET url = REPLACE(url, '/api/uploads', '/uploads')
-      WHERE url LIKE '/api/uploads%'
+      SET url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp')
+      WHERE url LIKE '/api/uploads%' OR url LIKE '%.jpg'
     `;
 
     console.log(`\nUpdated ${mainImagesResult} product main images`);
@@ -37,9 +42,10 @@ async function updateImageUrls() {
     // Get and display productImages before update
     const productImagesBefore = await prisma.productImage.findMany({
       where: {
-        url: {
-          startsWith: "/api/uploads",
-        },
+        OR: [
+          { url: { startsWith: "/api/uploads" } },
+          { url: { endsWith: ".jpg" } },
+        ],
       },
       select: {
         id: true,
@@ -51,15 +57,19 @@ async function updateImageUrls() {
     productImagesBefore.forEach((img) => {
       console.log(`ID: ${img.id}`);
       console.log(`From: ${img.url}`);
-      console.log(`To: ${img.url.replace("/api/uploads", "/uploads")}`);
+      console.log(
+        `To: ${img.url
+          .replace("/api/uploads", "/uploads")
+          .replace(".jpg", ".webp")}`
+      );
       console.log("---");
     });
 
     // Update productImages
     const imagesResult = await prisma.$executeRaw`
       UPDATE "ProductImage"
-      SET url = REPLACE(url, '/api/uploads', '/uploads')
-      WHERE url LIKE '/api/uploads%'
+      SET url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp')
+      WHERE url LIKE '/api/uploads%' OR url LIKE '%.jpg'
     `;
 
     console.log(`\nUpdated ${imagesResult} product images`);
@@ -67,9 +77,10 @@ async function updateImageUrls() {
     // Get and display categoryThumbnails before update
     const categoryThumbnailsBefore = await prisma.categoryThumbnail.findMany({
       where: {
-        url: {
-          startsWith: "/api/uploads",
-        },
+        OR: [
+          { url: { startsWith: "/api/uploads" } },
+          { url: { endsWith: ".jpg" } },
+        ],
       },
       select: {
         id: true,
@@ -81,15 +92,19 @@ async function updateImageUrls() {
     categoryThumbnailsBefore.forEach((img) => {
       console.log(`ID: ${img.id}`);
       console.log(`From: ${img.url}`);
-      console.log(`To: ${img.url.replace("/api/uploads", "/uploads")}`);
+      console.log(
+        `To: ${img.url
+          .replace("/api/uploads", "/uploads")
+          .replace(".jpg", ".webp")}`
+      );
       console.log("---");
     });
 
     // Update categoryThumbnails
     const categoryThumbnailsResult = await prisma.$executeRaw`
       UPDATE "CategoryThumbnail"
-      SET url = REPLACE(url, '/api/uploads', '/uploads')
-      WHERE url LIKE '/api/uploads%'
+      SET url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp')
+      WHERE url LIKE '/api/uploads%' OR url LIKE '%.jpg'
     `;
 
     console.log(`\nUpdated ${categoryThumbnailsResult} category thumbnails`);
@@ -97,9 +112,10 @@ async function updateImageUrls() {
     // Get and display postThumbnails before update
     const postThumbnailsBefore = await prisma.postThumbnail.findMany({
       where: {
-        url: {
-          startsWith: "/api/uploads",
-        },
+        OR: [
+          { url: { startsWith: "/api/uploads" } },
+          { url: { endsWith: ".jpg" } },
+        ],
       },
       select: {
         id: true,
@@ -111,15 +127,19 @@ async function updateImageUrls() {
     postThumbnailsBefore.forEach((img) => {
       console.log(`ID: ${img.id}`);
       console.log(`From: ${img.url}`);
-      console.log(`To: ${img.url.replace("/api/uploads", "/uploads")}`);
+      console.log(
+        `To: ${img.url
+          .replace("/api/uploads", "/uploads")
+          .replace(".jpg", ".webp")}`
+      );
       console.log("---");
     });
 
     // Update postThumbnails
     const postThumbnailsResult = await prisma.$executeRaw`
       UPDATE "PostThumbnail"
-      SET url = REPLACE(url, '/api/uploads', '/uploads')
-      WHERE url LIKE '/api/uploads%'
+      SET url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp')
+      WHERE url LIKE '/api/uploads%' OR url LIKE '%.jpg'
     `;
 
     console.log(`\nUpdated ${postThumbnailsResult} post thumbnails`);
