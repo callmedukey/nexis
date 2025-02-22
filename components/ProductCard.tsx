@@ -115,6 +115,10 @@ export function ProductCard({ product }: ProductCardProps) {
               <Image
                 src={product.productMainImages[0].url}
                 alt={product.name}
+                blurDataURL={product.productMainImages[0].url.replace(
+                  ".webp",
+                  "ph.webp"
+                )}
                 fill
                 className="object-fill transition-transform group-hover:scale-105"
               />
