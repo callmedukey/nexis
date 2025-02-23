@@ -32,13 +32,16 @@ export function ProductCarousel({ products }: ProductCarouselProps) {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
-    if (!api) {
-      return;
-    }
+    if (!api) return;
 
-    api.on("select", () => {
+    const onSelect = () => {
       setCurrent(api.selectedScrollSnap());
-    });
+    };
+
+    api.on("select", onSelect);
+    return () => {
+      api.off("select", onSelect);
+    };
   }, [api]);
 
   const plugin = useMemo(
@@ -46,8 +49,21 @@ export function ProductCarousel({ products }: ProductCarouselProps) {
       Autoplay({
         delay: 5000,
         stopOnInteraction: true,
-        stopOnMouseEnter: true,
+        rootNode: (emblaRoot) => emblaRoot.parentElement,
       }),
+    []
+  );
+
+  const carouselOptions = useMemo(
+    () => ({
+      align: "start" as const,
+      loop: true,
+      skipSnaps: false,
+      dragFree: false,
+      containScroll: "trimSnaps" as const,
+      watchDrag: true,
+      duration: 25,
+    }),
     []
   );
 
@@ -64,16 +80,16 @@ export function ProductCarousel({ products }: ProductCarouselProps) {
       <Carousel
         setApi={setApi}
         className="w-full"
-        opts={{
-          align: "start",
-          loop: true,
-        }}
+        opts={carouselOptions}
         plugins={[plugin]}
       >
-        <CarouselContent>
-          {products.map((product) => (
-            <CarouselItem key={product.id} className="basis-1/2 sm:basis-1/3">
-              <ProductCard product={product} />
+        <CarouselContent className="-ml-2 md:-ml-4">
+          {products.map((product, index) => (
+            <CarouselItem
+              key={product.id}
+              className="basis-1/2 pl-2 sm:basis-1/3 md:pl-4"
+            >
+              <ProductCard product={product} index={index} />
             </CarouselItem>
           ))}
         </CarouselContent>

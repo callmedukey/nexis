@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { toast } from "sonner";
 
 import { addToCart } from "@/actions/cart";
@@ -25,14 +25,65 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
+  index: number;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+const CartIcon = memo(() => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className="size-6"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+    />
+  </svg>
+));
+CartIcon.displayName = "CartIcon";
+
+const ProductImage = memo(
+  ({ url, name, index }: { url: string; name: string; index: number }) => (
+    <Image
+      src={url}
+      alt={name}
+      fill
+      sizes="(max-width: 640px) 50vw, 33vw"
+      priority={index === 0}
+      loading={index === 0 ? "eager" : "lazy"}
+      className="object-fill will-change-transform"
+      quality={75}
+      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx0eHh0dHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/2wBDAR0XFx4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+      placeholder="blur"
+    />
+  )
+);
+ProductImage.displayName = "ProductImage";
+
+const ShareButton = memo(
+  ({ onClick }: { onClick: (e: React.MouseEvent) => void }) => (
+    <button
+      onClick={onClick}
+      className="flex size-12 flex-col items-center justify-center rounded-full p-2"
+    >
+      <Image src={Share} alt="친구 공유" width={24} height={24} />
+      <span className="text-nowrap text-xs">친구 공유</span>
+    </button>
+  )
+);
+ShareButton.displayName = "ShareButton";
+
+function ProductCardComponent({ product, index }: ProductCardProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
     if (product.options && product.options.length > 0) {
       setIsModalOpen(true);
       return;
@@ -57,32 +108,8 @@ export function ProductCard({ product }: ProductCardProps) {
     }
   };
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleModalSubmit = async (optionIndex: number, quantity: number) => {
-    try {
-      setLoading(true);
-      const response = await addToCart({
-        productId: product.id,
-        quantity,
-        ...(product.options.length > 0 ? { optionIndex } : {}),
-      });
-      if (response.success) {
-        toast.success(response.message || "장바구니에 추가되었습니다");
-        handleModalClose();
-      } else {
-        toast.error(response.message || "장바구니 추가에 실패했습니다");
-      }
-    } catch {
-      toast.error("장바구니 추가에 실패했습니다");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleShare = async () => {
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
     try {
       if (navigator.share) {
         await navigator.share({
@@ -106,23 +133,20 @@ export function ProductCard({ product }: ProductCardProps) {
     }
   };
 
+  const discountedPrice = Math.round(
+    product.price * (1 - product.discount / 100)
+  );
+
   return (
     <>
-      <Link href={`/products/${product.id}`} className="block">
+      <Link href={`/products/${product.id}`} className="block" prefetch={false}>
         <div className="group overflow-hidden bg-white">
           <div className="relative aspect-square">
             {product.productMainImages?.[0] && (
-              <Image
-                src={product.productMainImages[0].url}
-                alt={product.name}
-                blurDataURL={product.productMainImages[0].url.replace(
-                  ".webp",
-                  "ph.webp"
-                )}
-                placeholder="blur"
-                fill
-                priority
-                className="object-fill transition-transform group-hover:scale-105"
+              <ProductImage
+                url={product.productMainImages[0].url}
+                name={product.name}
+                index={index}
               />
             )}
             {product.discount > 0 && (
@@ -133,9 +157,11 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
           <div className="space-y-2 p-2">
             <h3 className="truncate text-sm font-bold">{product.name}</h3>
-            <p className="line-clamp-2 text-xs text-muted-foreground">
-              {product.description}
-            </p>
+            {product.description && (
+              <p className="line-clamp-2 text-xs text-muted-foreground">
+                {product.description}
+              </p>
+            )}
             <div className="flex items-baseline gap-2">
               {product.discount > 0 && (
                 <span className="hidden text-sm font-semibold text-primaryred sm:inline">
@@ -144,17 +170,12 @@ export function ProductCard({ product }: ProductCardProps) {
               )}
               <span className="text-2xl font-bold">
                 <span className="text-sm tracking-[-0.15rem]">₩</span>{" "}
-                {Math.round(
-                  product.price * (1 - product.discount / 100)
-                ).toLocaleString()}
+                {discountedPrice.toLocaleString()}
               </span>
             </div>
             <div className="!mt-4 flex gap-4">
               <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleAddToCart();
-                }}
+                onClick={handleAddToCart}
                 disabled={loading}
                 className="flex size-12 items-center justify-center rounded-full bg-anotherblue p-2 text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="카트에 담기"
@@ -162,32 +183,10 @@ export function ProductCard({ product }: ProductCardProps) {
                 {loading ? (
                   <Loader2 className="size-6 animate-spin" />
                 ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="size-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-                    />
-                  </svg>
+                  <CartIcon />
                 )}
               </button>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleShare();
-                }}
-                className="flex size-12 flex-col items-center justify-center rounded-full p-2"
-              >
-                <Image src={Share} alt="친구 공유" width={24} height={24} />
-                <span className="text-nowrap text-xs">친구 공유</span>
-              </button>
+              <ShareButton onClick={handleShare} />
             </div>
           </div>
         </div>
@@ -195,11 +194,32 @@ export function ProductCard({ product }: ProductCardProps) {
       {isModalOpen && (
         <ProductOptionsModal
           product={product}
-          onClose={handleModalClose}
-          onSubmit={handleModalSubmit}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={async (optionIndex: number, quantity: number) => {
+            try {
+              setLoading(true);
+              const response = await addToCart({
+                productId: product.id,
+                quantity,
+                ...(product.options.length > 0 ? { optionIndex } : {}),
+              });
+              if (response.success) {
+                toast.success(response.message || "장바구니에 추가되었습니다");
+                setIsModalOpen(false);
+              } else {
+                toast.error(response.message || "장바구니 추가에 실패했습니다");
+              }
+            } catch {
+              toast.error("장바구니 추가에 실패했습니다");
+            } finally {
+              setLoading(false);
+            }
+          }}
           isLoading={loading}
         />
       )}
     </>
   );
 }
+
+export const ProductCard = memo(ProductCardComponent);

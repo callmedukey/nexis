@@ -62,7 +62,7 @@ model User {
 model Order {
   id     String @id
 
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: NoAction)
   userId String
 
   products Product[]
@@ -79,7 +79,7 @@ model Order {
   trackingNumber String?
   trackingCompany String?
 
-  couponApplied Coupon? @relation(fields: [couponAppliedId], references: [id])
+  couponApplied Coupon? @relation(fields: [couponAppliedId], references: [id], onDelete: NoAction)
   couponAppliedId Int?
 
   deliveryAddress DeliveryAddress?

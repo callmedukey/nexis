@@ -26,10 +26,6 @@ export async function uploadImage(
     const uploadDir = path.join(process.cwd(), "public/uploads", folder);
     const filePath = path.join(uploadDir, filename);
     const webpPath = path.join(uploadDir, `${fileNameWithoutExt}.webp`);
-    const placeholderPath = path.join(
-      uploadDir,
-      `${fileNameWithoutExt}ph.webp`
-    );
 
     // URL paths for client
     const fileUrl = `/uploads/${folder}/${fileNameWithoutExt}.webp`;
@@ -37,11 +33,28 @@ export async function uploadImage(
     // Ensure upload directory exists
     await createDirectoryIfNotExists(uploadDir);
 
-    // Process and save the image in different formats
-    await sharp(buffer).webp({ lossless: true, quality: 100 }).toFile(webpPath);
+    // Process and save the image with different sizes based on folder
+    const imageProcessor = sharp(buffer);
 
-    // Create placeholder version
-    await sharp(buffer).webp({ quality: 20 }).toFile(placeholderPath);
+    if (folder === "categories") {
+      // Categories images are tiny but high quality
+      await imageProcessor
+        .resize(50, null, {
+          fit: "contain",
+          withoutEnlargement: true,
+        })
+        .webp({ quality: 100, lossless: true })
+        .toFile(webpPath);
+    } else {
+      // Standard size for all other images
+      await imageProcessor
+        .resize(640, null, {
+          fit: "contain",
+          withoutEnlargement: true,
+        })
+        .webp({ quality: 80, lossless: true })
+        .toFile(webpPath);
+    }
 
     // Save original as backup
     await writeFile(filePath, buffer);
@@ -55,7 +68,6 @@ export async function uploadImage(
 
       // Verify files are accessible
       await access(webpPath);
-      await access(placeholderPath);
       await access(filePath);
     } catch (error) {
       console.error("Failed to verify files:", error);

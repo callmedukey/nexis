@@ -1,13 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useContext, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 import { FileUploader } from "@/components/extension/file-uploader";
-import { ImageWithFallback } from "./ImageWithFallback";
 
 import { FileInputWrapper } from "./FileInputWrapper";
+import { ImageWithFallback } from "./ImageWithFallback";
 import { Context } from "../_providers/ContextProvider";
 
 type ImageFile = File & { url?: string };

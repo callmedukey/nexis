@@ -10,8 +10,10 @@ async function updateImageUrls() {
         OR: [
           { url: { startsWith: "/api/uploads" } },
           { url: { endsWith: ".jpg" } },
+          { url: { endsWith: ".png" } },
           { filetype: "image/jpg" },
           { filetype: "image/jpeg" },
+          { filetype: "image/png" },
         ],
       },
       select: {
@@ -29,7 +31,7 @@ async function updateImageUrls() {
       console.log(
         `To URL: ${img.url
           .replace("/api/uploads", "/uploads")
-          .replace(".jpg", ".webp")}`
+          .replace(/\.(jpg|png)$/, ".webp")}`
       );
       console.log(`To type: image/webp`);
       console.log("---");
@@ -39,12 +41,14 @@ async function updateImageUrls() {
     const mainImagesResult = await prisma.$executeRaw`
       UPDATE "ProductMainImage"
       SET 
-        url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp'),
+        url = REGEXP_REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '\.(jpg|png)$', '.webp'),
         filetype = 'image/webp'
       WHERE url LIKE '/api/uploads%' 
-        OR url LIKE '%.jpg' 
+        OR url LIKE '%.jpg'
+        OR url LIKE '%.png'
         OR filetype = 'image/jpg'
         OR filetype = 'image/jpeg'
+        OR filetype = 'image/png'
     `;
 
     console.log(`\nUpdated ${mainImagesResult} product main images`);
@@ -55,8 +59,10 @@ async function updateImageUrls() {
         OR: [
           { url: { startsWith: "/api/uploads" } },
           { url: { endsWith: ".jpg" } },
+          { url: { endsWith: ".png" } },
           { filetype: "image/jpg" },
           { filetype: "image/jpeg" },
+          { filetype: "image/png" },
         ],
       },
       select: {
@@ -74,7 +80,7 @@ async function updateImageUrls() {
       console.log(
         `To URL: ${img.url
           .replace("/api/uploads", "/uploads")
-          .replace(".jpg", ".webp")}`
+          .replace(/\.(jpg|png)$/, ".webp")}`
       );
       console.log(`To type: image/webp`);
       console.log("---");
@@ -84,12 +90,14 @@ async function updateImageUrls() {
     const imagesResult = await prisma.$executeRaw`
       UPDATE "ProductImage"
       SET 
-        url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp'),
+        url = REGEXP_REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '\.(jpg|png)$', '.webp'),
         filetype = 'image/webp'
       WHERE url LIKE '/api/uploads%' 
-        OR url LIKE '%.jpg' 
+        OR url LIKE '%.jpg'
+        OR url LIKE '%.png'
         OR filetype = 'image/jpg'
         OR filetype = 'image/jpeg'
+        OR filetype = 'image/png'
     `;
 
     console.log(`\nUpdated ${imagesResult} product images`);
@@ -100,8 +108,10 @@ async function updateImageUrls() {
         OR: [
           { url: { startsWith: "/api/uploads" } },
           { url: { endsWith: ".jpg" } },
+          { url: { endsWith: ".png" } },
           { filetype: "image/jpg" },
           { filetype: "image/jpeg" },
+          { filetype: "image/png" },
         ],
       },
       select: {
@@ -119,7 +129,7 @@ async function updateImageUrls() {
       console.log(
         `To URL: ${img.url
           .replace("/api/uploads", "/uploads")
-          .replace(".jpg", ".webp")}`
+          .replace(/\.(jpg|png)$/, ".webp")}`
       );
       console.log(`To type: image/webp`);
       console.log("---");
@@ -129,12 +139,14 @@ async function updateImageUrls() {
     const categoryThumbnailsResult = await prisma.$executeRaw`
       UPDATE "CategoryThumbnail"
       SET 
-        url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp'),
+        url = REGEXP_REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '\.(jpg|png)$', '.webp'),
         filetype = 'image/webp'
       WHERE url LIKE '/api/uploads%' 
-        OR url LIKE '%.jpg' 
+        OR url LIKE '%.jpg'
+        OR url LIKE '%.png'
         OR filetype = 'image/jpg'
         OR filetype = 'image/jpeg'
+        OR filetype = 'image/png'
     `;
 
     console.log(`\nUpdated ${categoryThumbnailsResult} category thumbnails`);
@@ -145,8 +157,10 @@ async function updateImageUrls() {
         OR: [
           { url: { startsWith: "/api/uploads" } },
           { url: { endsWith: ".jpg" } },
+          { url: { endsWith: ".png" } },
           { filetype: "image/jpg" },
           { filetype: "image/jpeg" },
+          { filetype: "image/png" },
         ],
       },
       select: {
@@ -164,7 +178,7 @@ async function updateImageUrls() {
       console.log(
         `To URL: ${img.url
           .replace("/api/uploads", "/uploads")
-          .replace(".jpg", ".webp")}`
+          .replace(/\.(jpg|png)$/, ".webp")}`
       );
       console.log(`To type: image/webp`);
       console.log("---");
@@ -174,12 +188,14 @@ async function updateImageUrls() {
     const postThumbnailsResult = await prisma.$executeRaw`
       UPDATE "PostThumbnail"
       SET 
-        url = REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '.jpg', '.webp'),
+        url = REGEXP_REPLACE(REPLACE(url, '/api/uploads', '/uploads'), '\.(jpg|png)$', '.webp'),
         filetype = 'image/webp'
       WHERE url LIKE '/api/uploads%' 
-        OR url LIKE '%.jpg' 
+        OR url LIKE '%.jpg'
+        OR url LIKE '%.png'
         OR filetype = 'image/jpg'
         OR filetype = 'image/jpeg'
+        OR filetype = 'image/png'
     `;
 
     console.log(`\nUpdated ${postThumbnailsResult} post thumbnails`);
