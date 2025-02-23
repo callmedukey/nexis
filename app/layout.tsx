@@ -4,11 +4,12 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 
 import { auth } from "@/auth";
+import ConditionsFooter from "@/components/layout/ConditionsFooter";
 import Header from "@/components/layout/Header";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { Toaster } from "@/components/ui/sonner";
+
 import Footer from "../components/layout/Footer";
-import ConditionsFooter from "@/components/layout/ConditionsFooter";
 
 const notoSans = NotoSans({
   variable: "--font-noto",
@@ -51,6 +52,7 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  manifest: "/manifest.json",
   openGraph: {
     title: "넥시스 버스 - 프리미엄 버스 인테리어 전문",
     description:

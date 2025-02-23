@@ -1,0 +1,36 @@
+{
+  "name": "넥시스 버스 - 프리미엄 버스 인테리어 전문",
+  "short_name": "넥시스 버스",
+  "description": "버스의 프리미엄 용품과 인테리어 소품의 모든 것! 버스 인테리어 전문 컨설팅 기업, 넥시스",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "categories": ["transportation", "business", "shopping"],
+  "lang": "ko-KR",
+  "dir": "ltr",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/700.png",
+      "sizes": "700x700",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": []
+}

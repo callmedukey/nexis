@@ -12,6 +12,7 @@
 !.yarn/versions
 /public/uploads/*
 /public/uploads/
+/public/sw.js
 # testing
 /coverage
 .eslintrc.json
