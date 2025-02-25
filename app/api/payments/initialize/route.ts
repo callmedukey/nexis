@@ -38,7 +38,6 @@ export async function POST(req: Request) {
       failUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/api/payments/fail`,
     };
 
-    console.log("Server Payment Data:", paymentData);
     return NextResponse.json(paymentData);
   } catch (error) {
     console.error("[PAYMENT_INITIALIZE]", error);

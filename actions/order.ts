@@ -184,13 +184,11 @@ export async function submitOrder(data: z.infer<typeof submitOrderSchema>) {
         .catch(() => {
           // Ignore deletion errors
         });
-      console.error("Payment initialization failed:", paymentData);
       return { error: "결제 초기화에 실패했습니다" };
     }
 
     return { success: true, orderId, paymentData };
   } catch (error) {
-    console.error("Order submission error:", error);
     return { error: "Failed to submit order" };
   }
 }
@@ -244,7 +242,6 @@ export async function updateOrderStatus(
 
     return { success: true };
   } catch (error) {
-    console.error("Order status update error:", error);
     return { error: "Failed to update order status" };
   }
 }

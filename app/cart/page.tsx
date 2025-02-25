@@ -2,12 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { getCartItems } from "@/actions/cart";
 import { OrderSummary } from "@/app/cart/_components/OrderSummary";
 import { CartItem } from "@/components/cart/CartItem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
 
 type CartData = NonNullable<Awaited<ReturnType<typeof getCartItems>>["data"]>;
 
@@ -28,7 +28,7 @@ export default function CartPage() {
       }
 
       setCart(result.data || null);
-    } catch (error) {
+    } catch {
       toast.error("장바구니를 불러오는데 실패했습니다");
     } finally {
       setIsLoading(false);
@@ -41,7 +41,7 @@ export default function CartPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 min-h-screen">
+      <div className="container mx-auto min-h-screen p-4">
         <Card>
           <CardContent className="flex min-h-[300px] items-center justify-center">
             <p className="text-muted-foreground">Loading...</p>
@@ -79,7 +79,7 @@ export default function CartPage() {
     : undefined;
 
   return (
-    <div className="container mx-auto p-4 min-h-screen">
+    <div className="container mx-auto min-h-screen p-4">
       {items.length === 0 ? (
         <Card>
           <CardContent className="flex min-h-[300px] items-center justify-center">

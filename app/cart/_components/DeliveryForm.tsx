@@ -1,16 +1,5 @@
 "use client";
 
-declare global {
-  interface Window {
-    daum: any;
-  }
-}
-
-interface IAddr {
-  address: string;
-  zonecode: string;
-}
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import Script from "next/script";
 import { useForm } from "react-hook-form";
@@ -27,6 +16,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+
+declare global {
+  interface Window {
+    daum: any;
+  }
+}
+
+interface IAddr {
+  address: string;
+  zonecode: string;
+}
 
 const deliveryFormSchema = z.object({
   name: z.string().min(1, "이름을 입력해주세요"),
@@ -89,7 +89,7 @@ export function DeliveryForm({
         zipcode: data.zipcode,
         setAsDefault: data.setAsDefault,
       },
-      couponDiscount: couponDiscount,
+      couponDiscount,
     });
   };
 
@@ -217,7 +217,7 @@ export function DeliveryForm({
                         type="checkbox"
                         checked={field.value}
                         onChange={field.onChange}
-                        className="h-4 w-4 rounded border-gray-300"
+                        className="size-4 rounded border-gray-300"
                       />
                     </FormControl>
                     <FormLabel className="font-normal">

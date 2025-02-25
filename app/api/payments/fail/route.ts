@@ -20,7 +20,6 @@ export async function GET(req: Request) {
       })
       .catch(() => {
         // Ignore error if temporary order doesn't exist
-        console.log("Temporary order already deleted or not found:", orderId);
       });
 
     // Redirect to failure page

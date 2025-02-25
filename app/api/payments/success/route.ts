@@ -52,7 +52,6 @@ export async function GET(req: Request) {
     const paymentData = await response.json();
 
     if (!response.ok) {
-      console.error("Toss Payments Error:", paymentData);
       return NextResponse.json(
         { error: "Failed to confirm payment" },
         { status: response.status }
@@ -145,7 +144,6 @@ export async function GET(req: Request) {
       `${process.env.NEXT_PUBLIC_BASE_URL}/account/payment/success?orderId=${orderId}`
     );
   } catch (error) {
-    console.error("[PAYMENT_SUCCESS]", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

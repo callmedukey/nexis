@@ -1,29 +1,7 @@
 "use client";
 
-declare global {
-  const TossPayments: ((clientKey: string) => {
-    payment: (options?: { customerKey?: string }) => {
-      requestPayment: (options: {
-        method: string;
-        amount: {
-          currency: string;
-          value: number;
-        };
-        orderId: string;
-        orderName: string;
-        customerName: string;
-        successUrl: string;
-        failUrl: string;
-      }) => Promise<void>;
-    };
-  }) & {
-    ANONYMOUS: string;
-  };
-}
-
-import { useRouter } from "next/navigation";
-import Script from "next/script";
-import { useState, useTransition } from "react";
+import { loadTossPayments, ANONYMOUS } from "@tosspayments/tosspayments-sdk";
+import { useState, useTransition, useRef, useEffect } from "react";
 import { toast } from "sonner";
 
 import { submitOrder } from "@/actions/order";
@@ -62,11 +40,54 @@ export function OrderSummary({
 }: OrderSummaryProps) {
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [showPaymentMethods, setShowPaymentMethods] = useState(false);
+  const paymentMethodRef = useRef<HTMLDivElement>(null);
+  const [paymentWidgets, setPaymentWidgets] = useState<any>(null);
+  const [paymentMethodWidget, setPaymentMethodWidget] = useState<any>(null);
 
   // Calculate final price whenever discountedTotal or couponDiscount changes
   const finalPrice = Math.max(0, discountedTotal - couponDiscount);
+
+  // Initialize payment widgets when showing payment methods
+  useEffect(() => {
+    if (showPaymentMethods && paymentMethodRef.current && !paymentWidgets) {
+      const initializePaymentWidgets = async () => {
+        try {
+          // Load Toss Payments with the API individual integration key
+          const tossPayments = await loadTossPayments(
+            process.env.NEXT_PUBLIC_TOSS_CLIENT_ID || ""
+          );
+
+          // Initialize the widgets module with anonymous customer key
+          const widgets = tossPayments.widgets({
+            customerKey: ANONYMOUS,
+          });
+
+          // Set the payment amount
+          widgets.setAmount({
+            value: finalPrice,
+            currency: "KRW",
+          });
+
+          setPaymentWidgets(widgets);
+
+          // Render payment methods
+          const methodWidget = await widgets.renderPaymentMethods({
+            selector: "#payment-method",
+            variantKey: "DEFAULT",
+          });
+
+          setPaymentMethodWidget(methodWidget);
+        } catch (error) {
+          console.error("Payment widget initialization error:", error);
+          toast.error("결제 위젯 초기화에 실패했습니다");
+        }
+      };
+
+      initializePaymentWidgets();
+    }
+  }, [showPaymentMethods, finalPrice, paymentWidgets]);
 
   const handleDeliverySubmit = async (data: {
     deliveryInfo: {
@@ -94,92 +115,117 @@ export function OrderSummary({
         return;
       }
 
-      try {
-        console.log("Payment Data:", result.paymentData);
-
-        // Load Toss Payments widget
-        const tossPayments = TossPayments(
-          process.env.NEXT_PUBLIC_TOSS_CLIENT_ID || ""
-        );
-
-        // Create payment instance with anonymous customer key
-        const payment = tossPayments.payment({
-          customerKey: TossPayments.ANONYMOUS,
-        });
-
-        const paymentRequest = {
-          method: "CARD",
-          amount: result.paymentData.amount,
-          orderId: result.paymentData.orderId,
-          orderName: result.paymentData.orderName,
-          customerName: result.paymentData.customerName,
-          successUrl: result.paymentData.successUrl,
-          failUrl: result.paymentData.failUrl,
-        } as const;
-
-        console.log("Payment Request:", paymentRequest);
-
-        // Initialize payment
-        await payment.requestPayment(paymentRequest);
-      } catch (error) {
-        console.error("Payment request error:", error);
-        toast.error("결제 요청 중 오류가 발생했습니다");
-      }
+      // Show payment methods after successful order submission
+      setShowPaymentMethods(true);
     });
   };
 
+  const handlePayment = async () => {
+    if (!paymentWidgets || !paymentMethodWidget) {
+      toast.error("결제 위젯이 초기화되지 않았습니다");
+      return;
+    }
+
+    try {
+      // Get the selected payment method
+      const selectedMethod = paymentMethodWidget.getSelectedPaymentMethod();
+      if (!selectedMethod) {
+        toast.error("결제 수단을 선택해주세요");
+        return;
+      }
+
+      // Prepare payment request with the correct structure
+      const paymentRequest = {
+        orderId: `order-${Date.now()}`,
+        orderName: "상품 주문",
+        customerName: userData?.name || "고객",
+        successUrl: `${window.location.origin}/api/payments/success`,
+        failUrl: `${window.location.origin}/api/payments/fail`,
+        // method parameter is not supported in this context
+      };
+
+      // Request payment using the widgets module
+      await paymentWidgets.requestPayment(paymentRequest);
+    } catch (error) {
+      console.error("Payment request error:", error);
+      toast.error("결제 요청 중 오류가 발생했습니다");
+    }
+  };
+
   return (
-    <>
-      <Script
-        src="https://js.tosspayments.com/v2/standard"
-        strategy="lazyOnload"
-      />
-      <div className="space-y-4">
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>주문 요약</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">상품 금액</span>
+            <span>{formatPrice(originalTotal)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">할인 금액</span>
+            <span>-{formatPrice(totalDiscount)}</span>
+          </div>
+          <CouponForm
+            discountedTotal={discountedTotal}
+            onValidCoupon={(discount) => {
+              setCouponDiscount(discount);
+            }}
+          />
+          <Separator />
+          <div className="flex justify-between font-bold">
+            <span>총 결제 금액</span>
+            <span>{formatPrice(finalPrice)}</span>
+          </div>
+        </CardContent>
+        <CardFooter>
+          {!showDeliveryForm && !showPaymentMethods && (
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={() => setShowDeliveryForm(true)}
+              disabled={isPending}
+            >
+              {isPending ? "주문 처리중..." : "배송지 입력"}
+            </Button>
+          )}
+        </CardFooter>
+      </Card>
+
+      {showDeliveryForm && !showPaymentMethods && (
+        <DeliveryForm
+          defaultValues={userData}
+          couponDiscount={couponDiscount}
+          onSubmit={handleDeliverySubmit}
+        />
+      )}
+
+      {showPaymentMethods && (
         <Card>
           <CardHeader>
-            <CardTitle>주문 요약</CardTitle>
+            <CardTitle>결제 수단 선택</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">상품 금액</span>
-              <span>{formatPrice(originalTotal)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">할인 금액</span>
-              <span>-{formatPrice(totalDiscount)}</span>
-            </div>
-            <CouponForm
-              discountedTotal={discountedTotal}
-              onValidCoupon={(discount) => {
-                setCouponDiscount(discount);
-              }}
-            />
-            <Separator />
-            <div className="flex justify-between font-bold">
-              <span>총 결제 금액</span>
-              <span>{formatPrice(finalPrice)}</span>
-            </div>
+          <CardContent>
+            {/* Payment method widget will be rendered here */}
+            <div
+              id="payment-method"
+              ref={paymentMethodRef}
+              className="mb-4"
+            ></div>
           </CardContent>
           <CardFooter>
             <Button
               className="w-full"
               size="lg"
-              onClick={() => setShowDeliveryForm(true)}
-              disabled={showDeliveryForm || isPending}
+              onClick={handlePayment}
+              disabled={isPending || !paymentMethodWidget}
             >
-              {isPending ? "주문 처리중..." : "배송지 입력"}
+              {isPending ? "결제 처리중..." : "결제하기"}
             </Button>
           </CardFooter>
         </Card>
-
-        {showDeliveryForm && (
-          <DeliveryForm
-            defaultValues={userData}
-            couponDiscount={couponDiscount}
-            onSubmit={handleDeliverySubmit}
-          />
-        )}
-      </div>
-    </>
+      )}
+    </div>
   );
 }
