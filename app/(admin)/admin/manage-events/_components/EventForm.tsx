@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Events, EventsThumbnail } from "@prisma/client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -28,7 +29,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Events, EventsThumbnail } from "@prisma/client";
 
 const formSchema = z.object({
   title: z.string().min(1, "제목을 입력해주세요"),

@@ -45,6 +45,15 @@ export async function uploadImage(
         })
         .webp({ quality: 100, lossless: true })
         .toFile(webpPath);
+    } else if (folder === "events") {
+      // Event images are larger at 1024px width
+      await imageProcessor
+        .resize(1024, null, {
+          fit: "contain",
+          withoutEnlargement: true,
+        })
+        .webp({ quality: 100, lossless: true })
+        .toFile(webpPath);
     } else {
       // Standard size for all other images
       await imageProcessor
