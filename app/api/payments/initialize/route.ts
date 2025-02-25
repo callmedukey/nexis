@@ -1,6 +1,7 @@
+import { NextResponse } from "next/server";
+
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
@@ -34,13 +35,12 @@ export async function POST(req: Request) {
       orderId: orderData.orderId,
       orderName: `Order #${orderData.orderId}`,
       customerName: orderData.deliveryInfo.name || "Guest",
-      successUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/api/payments/success`,
-      failUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/api/payments/fail`,
+      successUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/api/payments/success?orderId=${orderData.orderId}`,
+      failUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/api/payments/fail?orderId=${orderData.orderId}`,
     };
 
     return NextResponse.json(paymentData);
-  } catch (error) {
-    console.error("[PAYMENT_INITIALIZE]", error);
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import prisma from "@/lib/prisma";
 
 export async function GET(req: Request) {
@@ -26,8 +27,7 @@ export async function GET(req: Request) {
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_BASE_URL}/account/payment/fail?orderId=${orderId}`
     );
-  } catch (error) {
-    console.error("[PAYMENT_FAIL]", error);
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

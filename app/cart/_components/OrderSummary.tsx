@@ -45,6 +45,7 @@ export function OrderSummary({
   const paymentMethodRef = useRef<HTMLDivElement>(null);
   const [paymentWidgets, setPaymentWidgets] = useState<any>(null);
   const [paymentMethodWidget, setPaymentMethodWidget] = useState<any>(null);
+  const [paymentData, setPaymentData] = useState<any>(null);
 
   // Calculate final price whenever discountedTotal or couponDiscount changes
   const finalPrice = Math.max(0, discountedTotal - couponDiscount);
@@ -117,12 +118,18 @@ export function OrderSummary({
 
       // Show payment methods after successful order submission
       setShowPaymentMethods(true);
+      setPaymentData(result.paymentData);
     });
   };
 
   const handlePayment = async () => {
     if (!paymentWidgets || !paymentMethodWidget) {
       toast.error("결제 위젯이 초기화되지 않았습니다");
+      return;
+    }
+
+    if (!paymentData) {
+      toast.error("결제 정보가 초기화되지 않았습니다");
       return;
     }
 
@@ -136,18 +143,16 @@ export function OrderSummary({
 
       // Prepare payment request with the correct structure
       const paymentRequest = {
-        orderId: `order-${Date.now()}`,
-        orderName: "상품 주문",
-        customerName: userData?.name || "고객",
-        successUrl: `${window.location.origin}/api/payments/success`,
-        failUrl: `${window.location.origin}/api/payments/fail`,
-        // method parameter is not supported in this context
+        orderId: paymentData.orderId,
+        orderName: paymentData.orderName,
+        customerName: paymentData.customerName,
+        successUrl: paymentData.successUrl,
+        failUrl: paymentData.failUrl,
       };
 
       // Request payment using the widgets module
       await paymentWidgets.requestPayment(paymentRequest);
-    } catch (error) {
-      console.error("Payment request error:", error);
+    } catch {
       toast.error("결제 요청 중 오류가 발생했습니다");
     }
   };

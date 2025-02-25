@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 import { PurchaseStatus } from "@prisma/client";
+import { NextResponse } from "next/server";
+
+import prisma from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
@@ -22,7 +23,13 @@ export async function GET(req: Request) {
     });
 
     if (!tempOrder) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: "Order not found",
+          details: `Could not find order with ID: ${orderId}`,
+        },
+        { status: 404 }
+      );
     }
 
     const orderData = tempOrder.orderData as any;
@@ -144,6 +151,7 @@ export async function GET(req: Request) {
       `${process.env.NEXT_PUBLIC_BASE_URL}/account/payment/success?orderId=${orderId}`
     );
   } catch (error) {
+    console.error("[PAYMENT_SUCCESS]", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

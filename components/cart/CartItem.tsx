@@ -64,6 +64,8 @@ export function CartItem({
 
       if (!response.success) {
         toast.error(response.message);
+      } else {
+        onQuantityChange?.();
       }
     } catch {
       toast.error("상품 삭제에 실패했습니다");

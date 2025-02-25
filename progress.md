@@ -9,6 +9,8 @@
   - Replaced standard TOSS payment with the widget version
   - Added payment method selection UI directly in the checkout page
   - Added payment agreement UI for terms and conditions
+  - Fixed order ID handling to ensure consistent format throughout payment flow
+  - Removed debugging console logs from payment processing code
 
 ## Next Steps
 
