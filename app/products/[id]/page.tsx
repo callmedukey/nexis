@@ -9,6 +9,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import prisma from "@/lib/prisma";
+import SpecialDelivery from "@/public/delivery_notice.webp";
 
 import { OptionsSelect } from "./_components/OptionsSelect";
 import { ProductActions } from "./_components/ProductActions";
@@ -150,6 +151,15 @@ export default async function Page({ params }: Props) {
               />
             </div>
           ))}
+          {product?.specialDelivery && (
+            <div className="relative w-full overflow-hidden">
+              <Image
+                src={SpecialDelivery}
+                alt={`${product.name} - 특별 배송 안내`}
+                className="h-auto w-full"
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
