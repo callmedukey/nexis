@@ -42,25 +42,22 @@ export async function GET(req: Request) {
     const response = await fetch(
       `https://api.tosspayments.com/v1/payments/${paymentKey}`,
       {
-        method: "POST",
+        method: "GET",
         headers: {
           Authorization: `Basic ${Buffer.from(
             process.env.TOSS_CLIENT_SECRET + ":"
           ).toString("base64")}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          orderId,
-          amount,
-        }),
       }
     );
 
     const paymentData = await response.json();
 
     if (!response.ok) {
+      console.error("[PAYMENT_CONFIRMATION_ERROR]", paymentData);
       return NextResponse.json(
-        { error: "Failed to confirm payment" },
+        { error: "Failed to confirm payment", details: paymentData },
         { status: response.status }
       );
     }
