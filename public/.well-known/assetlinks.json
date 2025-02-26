@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "kr.co.nexisbus.twa",
+        "sha256_cert_fingerprints": ["FD:35:71:21:AC:2E:BA:DB:D4:B1:49:68:8E:1B:A5:21:40:F9:FD:E8:2C:C5:1E:57:8E:06:98:26:1D:38:B4:63"]
+      }
+    }]
