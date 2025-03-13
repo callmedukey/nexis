@@ -15,6 +15,7 @@ export async function uploadImage(
 
     // Create a unique filename using crypto
     const ext = path.extname(file.name).toLowerCase();
+    const isGif = ext === ".gif";
     const hash = crypto
       .createHash("sha1")
       .update(Date.now() + file.name)
@@ -25,59 +26,70 @@ export async function uploadImage(
     // Create paths - now using public/uploads
     const uploadDir = path.join(process.cwd(), "public/uploads", folder);
     const filePath = path.join(uploadDir, filename);
-    const webpPath = path.join(uploadDir, `${fileNameWithoutExt}.webp`);
+
+    // For GIFs, we'll use the original format instead of WebP
+    const outputFilename = isGif ? filename : `${fileNameWithoutExt}.webp`;
+    const outputPath = path.join(uploadDir, outputFilename);
 
     // URL paths for client
-    const fileUrl = `/uploads/${folder}/${fileNameWithoutExt}.webp`;
+    const fileUrl = `/uploads/${folder}/${outputFilename}`;
 
     // Ensure upload directory exists
     await createDirectoryIfNotExists(uploadDir);
 
-    // Process and save the image with different sizes based on folder
-    const imageProcessor = sharp(buffer);
-
-    if (folder === "categories") {
-      // Categories images are tiny but high quality
-      await imageProcessor
-        .resize(50, null, {
-          fit: "contain",
-          withoutEnlargement: true,
-        })
-        .webp({ quality: 100, lossless: true })
-        .toFile(webpPath);
-    } else if (folder === "events") {
-      // Event images are larger at 1024px width
-      await imageProcessor
-        .resize(1024, null, {
-          fit: "contain",
-          withoutEnlargement: true,
-        })
-        .webp({ quality: 100, lossless: true })
-        .toFile(webpPath);
+    // For GIFs, skip Sharp processing to preserve animation
+    if (isGif) {
+      // Save the original GIF directly
+      await writeFile(outputPath, buffer);
     } else {
-      // Standard size for all other images
-      await imageProcessor
-        .resize(640, null, {
-          fit: "contain",
-          withoutEnlargement: true,
-        })
-        .webp({ quality: 80, lossless: true })
-        .toFile(webpPath);
-    }
+      // Process and save the image with different sizes based on folder
+      const imageProcessor = sharp(buffer);
 
-    // Save original as backup
-    await writeFile(filePath, buffer);
+      if (folder === "categories") {
+        // Categories images are tiny but high quality
+        await imageProcessor
+          .resize(50, null, {
+            fit: "contain",
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 100, lossless: true })
+          .toFile(outputPath);
+      } else if (folder === "events") {
+        // Event images are larger at 1024px width
+        await imageProcessor
+          .resize(1024, null, {
+            fit: "contain",
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 100, lossless: true })
+          .toFile(outputPath);
+      } else {
+        // Standard size for all other images
+        await imageProcessor
+          .resize(640, null, {
+            fit: "contain",
+            withoutEnlargement: true,
+          })
+          .webp({ quality: 80, lossless: true })
+          .toFile(outputPath);
+      }
+
+      // Save original as backup
+      await writeFile(filePath, buffer);
+    }
 
     // Verify the files were written successfully
     try {
-      const stats = await stat(webpPath);
+      const stats = await stat(outputPath);
       if (stats.size === 0) {
-        throw new Error("WebP file was written but is empty");
+        throw new Error("Output file was written but is empty");
       }
 
       // Verify files are accessible
-      await access(webpPath);
-      await access(filePath);
+      await access(outputPath);
+      if (!isGif) {
+        await access(filePath); // Only check backup file for non-GIFs
+      }
     } catch (error) {
       console.error("Failed to verify files:", error);
       throw new Error("Failed to verify file writes");
@@ -85,7 +97,7 @@ export async function uploadImage(
 
     return {
       url: fileUrl,
-      filename: `${fileNameWithoutExt}.webp`,
+      filename: outputFilename,
     };
   } catch (error) {
     console.error("Error uploading image:", error);
