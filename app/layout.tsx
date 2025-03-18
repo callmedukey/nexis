@@ -77,9 +77,9 @@ export const metadata: Metadata = {
       "버스의 프리미엄 용품과 인테리어 소품의 모든 것! 버스 인테리어 전문 컨설팅 기업, 넥시스",
     // images: ["/og-image.jpg"],
   },
-  verification: {
+  other: {
     // google: "your-google-site-verification", // You'll need to add this
-    // naver: "your-naver-site-verification", // You'll need to add this
+    "naver-site-verification": "ff128b303b67d1bc664834050059756666b6ca8f",
   },
 };
 
