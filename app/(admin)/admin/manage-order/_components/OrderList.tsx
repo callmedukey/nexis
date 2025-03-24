@@ -70,6 +70,15 @@ export async function OrderList({ searchParams }: OrderListProps) {
               phone: true,
             },
           },
+          deliveryAddress: {
+            select: {
+              name: true,
+              phone: true,
+              address: true,
+              detailedAddress: true,
+              zipcode: true,
+            },
+          },
           products: {
             include: {
               productMainImages: {
@@ -99,15 +108,18 @@ export async function OrderList({ searchParams }: OrderListProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>주문번호</TableHead>
-              <TableHead>품목</TableHead>
-              <TableHead>주문상태</TableHead>
-              <TableHead>결제상태</TableHead>
-              <TableHead>배송정보</TableHead>
-              <TableHead className="text-right">실결제금액</TableHead>
-              <TableHead>구매자</TableHead>
-              <TableHead>주문일</TableHead>
-              <TableHead>결제일</TableHead>
+              <TableHead className="whitespace-nowrap">주문번호</TableHead>
+              <TableHead className="whitespace-nowrap">품목</TableHead>
+              <TableHead className="whitespace-nowrap">주문상태</TableHead>
+              <TableHead className="whitespace-nowrap">결제상태</TableHead>
+              <TableHead className="whitespace-nowrap">배송정보</TableHead>
+              <TableHead className="whitespace-nowrap text-right">
+                실결제금액
+              </TableHead>
+              <TableHead className="whitespace-nowrap">구매자</TableHead>
+              <TableHead className="whitespace-nowrap">주소지</TableHead>
+              <TableHead className="whitespace-nowrap">주문일</TableHead>
+              <TableHead className="whitespace-nowrap">결제일</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -117,8 +129,10 @@ export async function OrderList({ searchParams }: OrderListProps) {
 
               return (
                 <TableRow key={order.id}>
-                  <TableCell>{order.id}</TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {order.id}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <Popover>
                       <PopoverTrigger className="flex items-center gap-2">
                         <span>{products.length}개 상품</span>
@@ -175,30 +189,30 @@ export async function OrderList({ searchParams }: OrderListProps) {
                       </PopoverContent>
                     </Popover>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <UpdateOrderStatus
                       orderId={order.id}
                       currentStatus={order.status}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {order.isCanceled
                       ? "취소됨"
                       : order.isRefunded
                       ? "환불됨"
                       : "결제완료"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <TrackingInputs
                       orderId={order.id}
                       initialTrackingCompany={order.trackingCompany}
                       initialTrackingNumber={order.trackingNumber}
                     />
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="whitespace-nowrap text-right">
                     {orderContent.totalAmount.toLocaleString()}원
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <Popover>
                       <PopoverTrigger className="flex items-center gap-2">
                         <span className="cursor-pointer text-primary underline">
@@ -234,10 +248,24 @@ export async function OrderList({ searchParams }: OrderListProps) {
                       </PopoverContent>
                     </Popover>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm text-muted-foreground">
+                        {order.deliveryAddress?.name}
+                      </span>
+                      <span className="text-sm">
+                        {order.deliveryAddress?.phone}
+                      </span>
+                      <span className="text-sm">
+                        {`[${order.deliveryAddress?.zipcode}] ${order.deliveryAddress?.address} ${order.deliveryAddress?.detailedAddress}` ||
+                          "-"}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {format(new Date(order.createdAt), "yyyy-MM-dd")}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     {format(new Date(order.createdAt), "yyyy-MM-dd")}
                   </TableCell>
                 </TableRow>

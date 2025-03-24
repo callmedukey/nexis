@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -25,7 +26,7 @@ export function BuyNowButton({
   onClick,
 }: BuyNowButtonProps) {
   const [isPending, startTransition] = useTransition();
-
+  const router = useRouter();
   const handleBuyNow = () => {
     onClick(() => {
       startTransition(async () => {
@@ -40,9 +41,13 @@ export function BuyNowButton({
 
         if (result.success) {
           // Redirect to cart instead of checkout
-          window.location.href = "/cart";
+          router.push("/cart");
         } else {
-          toast.error(result.message || "주문에 실패했습니다");
+          if (result.redirect) {
+            router.push(result.redirect);
+          } else {
+            toast.error(result.message || "주문에 실패했습니다");
+          }
         }
       });
     });
