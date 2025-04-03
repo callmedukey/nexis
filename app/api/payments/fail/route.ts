@@ -5,11 +5,19 @@ import prisma from "@/lib/prisma";
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const orderId = url.searchParams.get("orderId");
+    // Handle duplicate orderId parameters by getting all values and using the first one
+    const orderIds = url.searchParams.getAll("orderId");
+    const orderId = orderIds.length > 0 ? orderIds[0] : null;
+
+    console.log("Fail route parameters:", {
+      orderIds,
+      orderId,
+      url: req.url
+    });
 
     if (!orderId) {
       return NextResponse.json(
-        { error: "Missing required parameters" },
+        { error: "Missing required parameters", details: { orderId } },
         { status: 400 }
       );
     }
@@ -24,13 +32,30 @@ export async function GET(req: Request) {
       });
 
     // Redirect to failure page
+    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+    const host = req.headers.get("host") || "localhost:3000";
+    const baseUrl = `${protocol}://${host}`;
+    
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/account/payment/fail?orderId=${orderId}`
+      `${baseUrl}/account/payment/fail?orderId=${orderId}`
     );
-  } catch {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+  } catch (error) {
+    // Safely log the error without causing additional errors
+    try {
+      console.error("[PAYMENT_FAIL]", error);
+    } catch {
+      console.error("[PAYMENT_FAIL] Error occurred but could not be logged");
+    }
+    
+    // Fix the error handling to ensure proper JSON response
+    return new NextResponse(
+      JSON.stringify({ error: "Internal server error" }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
     );
   }
 }

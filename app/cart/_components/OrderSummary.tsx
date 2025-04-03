@@ -55,6 +55,9 @@ export function OrderSummary({
     if (showPaymentMethods && paymentMethodRef.current && !paymentWidgets) {
       const initializePaymentWidgets = async () => {
         try {
+          console.log("Initializing payment widgets with client ID:", process.env.NEXT_PUBLIC_TOSS_CLIENT_ID);
+          console.log("Final price:", finalPrice);
+          
           // Load Toss Payments with the API individual integration key
           const tossPayments = await loadTossPayments(
             process.env.NEXT_PUBLIC_TOSS_CLIENT_ID || ""
@@ -65,7 +68,7 @@ export function OrderSummary({
             customerKey: ANONYMOUS,
           });
 
-          // Set the payment amount
+          // Set the payment amount - this is crucial for the payment to work
           widgets.setAmount({
             value: finalPrice,
             currency: "KRW",
@@ -141,19 +144,40 @@ export function OrderSummary({
         return;
       }
 
-      // Prepare payment request with the correct structure
+      console.log("Selected payment method:", selectedMethod);
+
+      // Prepare payment request with all required parameters
       const paymentRequest = {
         orderId: paymentData.orderId,
         orderName: paymentData.orderName,
         customerName: paymentData.customerName,
+        customerEmail: paymentData.customerEmail,
+        customerMobilePhone: paymentData.customerMobilePhone,
         successUrl: paymentData.successUrl,
         failUrl: paymentData.failUrl,
       };
 
+      console.log("Payment request:", paymentRequest);
+      
+      // Show loading toast
+      const loadingToast = toast.loading("결제를 처리 중입니다...");
+      
       // Request payment using the widgets module
       await paymentWidgets.requestPayment(paymentRequest);
-    } catch {
-      toast.error("결제 요청 중 오류가 발생했습니다");
+      
+      // Note: We won't reach this point if the payment is successful
+      // as the browser will be redirected to the successUrl or failUrl
+      toast.dismiss(loadingToast);
+    } catch (error) {
+      // Log the error for debugging
+      console.error("Payment error:", error);
+      
+      // Show error message to user
+      if (error && typeof error === 'object' && 'message' in error) {
+        toast.error(`결제 오류: ${(error as any).message}`);
+      } else {
+        toast.error("결제 요청 중 오류가 발생했습니다");
+      }
     }
   };
 
