@@ -300,6 +300,7 @@ export async function validateCoupon(
 export async function getCartItems() {
   try {
     const session = await auth();
+
     if (!session?.user?.id) {
       return {
         success: false,

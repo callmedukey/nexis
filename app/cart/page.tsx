@@ -1,6 +1,6 @@
 "use client";
 
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -14,7 +14,7 @@ type CartData = NonNullable<Awaited<ReturnType<typeof getCartItems>>["data"]>;
 export default function CartPage() {
   const [cart, setCart] = useState<CartData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const router = useRouter();
   const fetchCart = useCallback(async () => {
     try {
       const result = await getCartItems();
@@ -22,13 +22,14 @@ export default function CartPage() {
       if (!result.success) {
         toast.error(result.message);
         if (result.message === "로그인이 필요합니다") {
-          redirect("/");
+          router.push("/login");
         }
         return;
       }
 
       setCart(result.data || null);
-    } catch {
+    } catch (error) {
+      console.error("[FETCH_CART]", error);
       toast.error("장바구니를 불러오는데 실패했습니다");
     } finally {
       setIsLoading(false);
