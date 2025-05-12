@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -76,6 +76,9 @@ export function SearchBar() {
     <div className="relative mx-auto w-full max-w-screen-lg px-4">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-primaryblack" />
+        {isSearching && (
+          <Loader2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-primaryblack" />
+        )}
         <input
           type="text"
           value={query}
