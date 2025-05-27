@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR as NotoSans } from "next/font/google";
-import "./globals.css";
+import { Noto_Sans_KR as notoSansKR } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
+
+import "./globals.css";
 
 import { auth } from "@/auth";
 import ConditionsFooter from "@/components/layout/ConditionsFooter";
@@ -11,7 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import Footer from "../components/layout/Footer";
 
-const notoSans = NotoSans({
+const notoSans = notoSansKR({
   variable: "--font-noto",
   subsets: ["latin"],
   display: "swap",
